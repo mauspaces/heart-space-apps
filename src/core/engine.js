@@ -4,9 +4,12 @@ import { clamp } from './util.js';
 import { LANG, t } from './i18n.js';
 import { ORG } from './catalog.js';
 import { STORM_DAY } from './sim.js';
-import { S, val, BASE, avg, cumDose } from './state.js';
+import { S, val as valOf, baseOf, avg as avgOf, cumDose as cumDoseOf } from './state.js';
+import { CREW_BY_ID } from './crew.js';
 
-export function evaluate(d){
+export function evaluate(d,id=S.member){
+  const val=(dd,k)=>valOf(dd,k,id), avg=(dd,k,n)=>avgOf(dd,k,n,id), cumDose=dd=>cumDoseOf(dd,id), BASE=baseOf(id);
+  const mars=S.env==='mars', vest2=mars&&CREW_BY_ID[id].gen.marsVest;
   const M={};
   const hr=val(d,'hr'); M.hr={v:hr,s: hr>120?2: hr>BASE.hr.m*1.15?1:0, b:BASE.hr.m};
   const hrv3=avg(d,'hrv',3); M.hrv={v:val(d,'hrv'),s: hrv3<BASE.hrv.m*0.7?2: hrv3<BASE.hrv.m*0.85?1:0, b:BASE.hrv.m};
@@ -21,7 +24,7 @@ export function evaluate(d){
   const ex7=avg(d,'ex',7); M.exercise={v:Math.round(ex7),s:ex7<60?2:ex7<80?1:0,b:BASE.ex.m};
   const dose=cumDose(d); const storm=(d===STORM_DAY);
   M.dose={v:Math.round(dose),s: storm&&!S.sheltered?2: storm?1: 0, b:null};
-  M.vestibular={v:S.env==='mars'?(LANG==='es'?'Inestable':'Unsteady'):(LANG==='es'?'Estable':'Steady'),s:S.env==='mars'?1:0,b:null};
+  M.vestibular={v:S.env==='mars'?(LANG==='es'?'Inestable':'Unsteady'):(LANG==='es'?'Estable':'Steady'),s:vest2?2:mars?1:0,b:null};
   M.vision={v:"20/20",s:0,b:"20/20"};
   const sy=val(d,'symptoms')||[]; M.symptoms={v:sy.length?sy.map(x=>t('sym_'+x)).join(', '):t('none'),s:sy.includes('chills')?1:sy.length?1:0,b:null,list:sy};
 
