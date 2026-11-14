@@ -33,7 +33,7 @@ npm run dev      # http://localhost:5173
 npm run build    # static site in dist/
 ```
 
-## Code map (Vite + vanilla ES modules, Three.js WebGL hologram in )
+## Code map (Vite + vanilla ES modules, Three.js WebGL hologram in `src/holo/holo3d.js`)
 
 | File | What it holds |
 |---|---|
@@ -61,7 +61,7 @@ Verified behaviour that must not regress (Mars transit): day 139 → "Possible e
 
 ## Status (updated)
 
-Done and pushed: A1 crew data, A2 Crew view + switcher, A3 contagion + privacy, B1 hybrid visual pass, B2 mini-map, B3 offline service worker, B4 README + GitHub Pages workflow, C1 demo mode, D1 WebGL hologram (, loaded as its own chunk;  is the fallback and still drives the ECG). Remaining work is polish and the submission material (screenshots, 7 slides). The original task list below is kept for reference.
+Done and pushed: A1 crew data, A2 Crew view + switcher, A3 contagion + privacy, B1 hybrid visual pass, B2 mini-map, B3 offline service worker, B4 README + GitHub Pages workflow, C1 demo mode, D1 WebGL hologram (`src/holo/holo3d.js`, loaded as its own chunk; `src/holo/holo2d.js` is the fallback and still drives the ECG). Remaining work is polish and the submission material (screenshots, 7 slides). The original task list below is kept for reference.
 
 ## Tasks
 
