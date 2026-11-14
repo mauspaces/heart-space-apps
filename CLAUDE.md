@@ -17,7 +17,8 @@ One line: "On Mars, the doctor is up to 20 minutes away. H.E.A.R.T turns every a
 ## Hard rules
 
 - No NASA insignia, worm logo, seal or mission patches. Citing NASA programs and sources as facts is fine.
-- Fictional crew only: no real astronauts' names, photos or likeness. Health data is simulated.
+- The crew is portrayed by the team members (Mauro, Alan, Jorge, David) in scenario roles; bios describe the role only. Never use real astronauts' names, photos or likeness. Health data is simulated.
+- Crew portraits go in `public/crew/` (`mauro.jpg`, `alan.jpg`, `jorge.jpg`, `david.jpg`); set `photoAI: true` in `src/core/crew.js` for AI-generated ones (draws the AI-generated mark). Missing files fall back to initials.
 - Medical thresholds are illustrative and labelled so. Do **not** invent statistics: use only figures already in the code or in `docs/brain/`.
 - Keep the disclaimer: "Prototype · simulated data · illustrative thresholds · not for clinical use".
 - Static site only, no backend, no accounts, no CDN requests: must run offline once loaded and deploy to GitHub Pages or Netlify.

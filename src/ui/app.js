@@ -8,6 +8,7 @@ import { CREW_BY_ID } from '../core/crew.js';
 import { evaluate } from '../core/engine.js';
 import { selectOrgan, frame, resize } from '../holo/holo2d.js';
 import { attachECG } from './ecg.js';
+import { portrait } from './portrait.js';
 
 const fmt=(v,dec)=>typeof v==='number'? v.toFixed(dec) : v;
 const shape=s=>`<i class="shape s${s}"></i>`;
@@ -69,7 +70,7 @@ function renderRight(){
   const m=CREW_BY_ID[S.member], pct=Math.round(E.dose/DOSE_LIMIT*100);
   const V=E.verdict, goWord=t(['ready','review','notfit'][V]), notGo=E.poll.filter(p=>p.s).length;
   R.innerHTML=`<section class="dossier">
-  <header class="who fade-in">
+  <header class="who fade-in">${portrait(m,'sm')}
     <span class="eyebrow">${t('role_'+m.role)} · “${m.callsign}”</span>
     <h1 class="who-name">${m.name}</h1>
     <p class="who-meta">${t('day')} ${S.day} / ${DAYS} · ${t('env_'+S.env)}</p>

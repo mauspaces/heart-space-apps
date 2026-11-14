@@ -4,7 +4,7 @@
 
 Entry for the **NASA Space Apps Challenge 2026** — *Create Health Monitoring Software for Astronauts on Space Missions*.
 
-> **Prototype · simulated data · illustrative thresholds · not for clinical use.** The crew is fictional. No real astronaut, photo or likeness is used.
+> **Prototype · simulated data · illustrative thresholds · not for clinical use.** The mission crew is portrayed by the four H.E.A.R.T team members. No real astronaut, photo or likeness is used, and every health value shown is simulated.
 
 ## What it is
 
@@ -14,7 +14,7 @@ A personal health console that runs entirely on board (offline-first) and helps 
 - **Combined-pattern alerts.** NASA notes that spaceflight hazards feed each other, so the engine looks at patterns (e.g. lower HRV + shorter sleep + rising temperature → possible early infection, *before* fever), not isolated numbers.
 - **Interactive 3D body hologram.** Tap an organ or its "+" pin to see what it does, today vs. baseline, a 30-day trend, what to do now, when to escalate and how to measure it. The five NASA hazards filter which organs light up.
 - **Readiness for a critical task** (EVA readiness score: Ready / Review / Not fit).
-- **Crew view** for the Crew Medical Officer: four fictional astronauts, status shape + colour, readiness, top alert, contagion alert, and a per-astronaut privacy switch (share with crew / share with Earth).
+- **Crew view** for the Crew Medical Officer: an EVA go / no-go poll board for the four crew members, portraits, top alert, contagion alert, and a per-astronaut privacy switch (share with crew / share with Earth).
 - **Environments:** ISS (≈0.5 s delay, 0.5 mSv/day) · Mars transit (≤20 min, 1.8 mSv/day) · Mars surface (≤20 min, 0.67 mSv/day, 0.38 g) · Lunar base (≈1.3 s, 0.17 g).
 - **Send a medical packet to Earth** with the real delay of the selected environment.
 - **Solar particle event** overlay with countdown and shelter checklist (sheltering reduces the event dose from ~42 to ~12 mSv).
@@ -89,4 +89,4 @@ Analog missions (CHAPEA-like) → Artemis lunar missions → lunar base → Mars
 
 ## Credits and licences
 
-Code: MIT-style, for the competition entry. Fonts: SIL Open Font License via Fontsource. Fictional crew names are invented; any resemblance to real people is coincidental.
+Code: MIT-style, for the competition entry. Fonts: SIL Open Font License via Fontsource. Crew portraits are the team members themselves; any AI-generated portrait carries a visible "AI-generated" mark.

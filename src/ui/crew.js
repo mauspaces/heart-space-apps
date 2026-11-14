@@ -6,6 +6,7 @@ import { CREW } from '../core/crew.js';
 import { S, PRIV, setMember, actions } from '../core/state.js';
 import { evaluate, feverMembers } from '../core/engine.js';
 import { DAYS } from '../core/sim.js';
+import { portrait } from './portrait.js';
 
 const TONE = { cdr: '#E8B23A', plt: '#4EA8DE', ms1: '#5BD6FF', ms2: '#D9653B' };
 const shape = s => `<i class="shape s${s}"></i>`;
@@ -52,7 +53,7 @@ function renderView() {
     ${banner}
     ${board(infos)}
     <div class="crew-grid">${infos.map(cardHtml).join('')}</div>
-    <p class="crew-note">${t('priv_note')} · ${t('disclaimer')}</p>
+    <p class="crew-note">${t('crew_portrayed')} · ${t('priv_note')} · ${t('disclaimer')}</p>
   </div>`;
   $('crewClose').onclick = () => toggleCrewView(false);
   root.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openMember(b.dataset.open));
@@ -94,7 +95,7 @@ function cardHtml({ m, E, worst, lvl, top }) {
     : `<div class="crew-private"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><span>${t('priv_private')}</span></div>`;
   const sw = (key, label) => `<button class="switch" role="switch" aria-checked="${priv[key]}" data-priv="${m.id}:${key}"><span class="knob2"></span><span class="sw-l">${label}</span><span class="sw-s">${priv[key] ? t('priv_on') : t('priv_off')}</span></button>`;
   return `<article class="crew-card${S.member === m.id ? ' current' : ''}" style="--ring:${priv.crew ? c : 'var(--line-2)'}" aria-label="${m.name}">
-    <header>${badge(m, 'lg')}<div><span class="label">${t('role_' + m.role)}</span><h3>${m.name}</h3><small>“${m.callsign}” · ${L(m.agency)}</small></div></header>
+    <header>${portrait(m)}<div><span class="label">${t('role_' + m.role)}</span><h3>${m.name}</h3><small>“${m.callsign}” · ${L(m.agency)}</small></div></header>
     ${body}
     <p class="crew-bio">${L(m.bio)}</p>
     <div class="crew-priv"><span class="label">${t('priv_title')}</span>${sw('crew', t('priv_crew'))}${sw('earth', t('priv_earth'))}</div>

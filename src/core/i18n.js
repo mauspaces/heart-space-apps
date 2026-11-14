@@ -137,3 +137,6 @@ Object.assign(STR.es,{
   src_water:"Registro de bolsas · hoy", src_exercise:"Registro de ejercicio · 7 días",
   crew_poll:"Votación de la tripulación"
 });
+
+Object.assign(STR.en,{ crew_portrayed:"Crew portrayed by the H.E.A.R.T team members. All health data is simulated." });
+Object.assign(STR.es,{ crew_portrayed:"Tripulación interpretada por los integrantes del equipo H.E.A.R.T. Todos los datos de salud son simulados." });
