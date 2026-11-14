@@ -228,5 +228,5 @@ function boot(){
 }
 
 /* init */
-actions.renderRight=renderRight; actions.renderHazards=renderHazards; actions.refresh=()=>setDay(S.day); actions.toast=toast; actions.sendPacket=()=>{ const b=$('sendPacket'); if(b) b.click(); };
+actions.renderRight=renderRight; actions.renderHazards=renderHazards; actions.refresh=()=>setDay(S.day); actions.setDay=d=>setDay(d,false); actions.selectOrgan=selectOrgan; actions.closeStorm=()=>{ clearInterval(stormTimer); $('storm').classList.remove('on'); }; actions.toast=toast; actions.sendPacket=()=>{ const b=$('sendPacket'); if(b) b.click(); };
 applyLang(); buildVitals(); resize(); setDay(S.day); boot(); requestAnimationFrame(frame);

@@ -1,1 +1,11 @@
-/* Demo mode — captions bar and controls. */
+/* Demo mode — launcher and captions bar. */
+.demo-launch{white-space:nowrap;border-radius:999px;letter-spacing:.06em;text-transform:uppercase;font-size:12px}
+.demo-bar{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);z-index:80;width:min(820px,calc(100% - 24px));background:rgba(14,15,24,.96);border:1px solid var(--line-2);border-radius:16px;padding:12px 16px 10px;animation:fadeUp .35s var(--ease)}
+.demo-bar[hidden]{display:none}
+.demo-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px}
+.demo-ctl{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.demo-bar p{margin:0 0 8px;font-size:15px;line-height:1.5;color:var(--text)}
+.demo-prog{height:2px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.demo-prog i{display:block;height:100%;width:0;background:var(--holo)}
+.demo-bar .btn:focus-visible{outline:2px solid var(--holo);outline-offset:2px}
+@media (max-width:1180px){.demo-bar{bottom:78px}.demo-bar p{font-size:13px}}
