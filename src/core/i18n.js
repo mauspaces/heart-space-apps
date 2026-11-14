@@ -104,3 +104,6 @@ Object.assign(STR.es,{
   priv_note:"El astronauta controla sus propios datos.", ms_status:"Estado", role_CDR:"Comandante", role_PLT:"Piloto", role_MS1:"Especialista de misión 1 · Oficial Médica", role_MS2:"Especialista de misión 2",
   demo_start:"Modo demo"
 });
+
+Object.assign(STR.en,{ boot_line:"On Mars, the doctor is up to 20 minutes away. Every astronaut becomes their own first responder." });
+Object.assign(STR.es,{ boot_line:"En Marte, el médico está hasta a 20 minutos. Cada astronauta se vuelve su propio primer respondiente." });

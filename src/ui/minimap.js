@@ -27,13 +27,13 @@ function render() {
   el.innerHTML = `<div class="mm" role="img" aria-label="${t('map_title')}: ${t('day')} ${S.day} / ${DAYS}, ${pct}%">
     <div class="mm-head"><span class="label">${t('map_title')}</span><span class="mono">${t('day')} ${S.day}</span></div>
     <svg viewBox="0 0 280 110" aria-hidden="true">
-      <path d="${d(path)}" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="1.2" stroke-dasharray="3 4"/>
-      <path d="${d(done)}" fill="none" stroke="#5BD6FF" stroke-width="1.8" stroke-linecap="round"/>
-      <circle cx="${E.x}" cy="${E.y}" r="${mr}" fill="none" stroke="rgba(255,255,255,.14)" stroke-dasharray="1.5 3"/>
-      <circle cx="${E.x}" cy="${E.y}" r="8" fill="#4EA8DE"/><circle cx="${E.x - 2.5}" cy="${E.y - 2.5}" r="3" fill="rgba(255,255,255,.35)"/>
-      <circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="2.6" fill="#C9CEDA"/>
-      <circle cx="${M.x}" cy="${M.y}" r="6" fill="#D9653B"/>
-      <g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})"><circle r="7" fill="rgba(232,178,58,.18)"/><path d="M0 -5 L3.4 4 L0 2.2 L-3.4 4 Z" fill="#E8B23A" transform="rotate(${(Math.atan2(bez(Math.min(1, u + .02)).y - p.y, bez(Math.min(1, u + .02)).x - p.x) * 180 / Math.PI + 90).toFixed(0)})"/></g>
+      <path d="${d(path)}" fill="none" stroke="#cecece" stroke-width="1" stroke-dasharray="2 4"/>
+      <path d="${d(done)}" fill="none" stroke="#0c0c0c" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="${E.x}" cy="${E.y}" r="${mr}" fill="none" stroke="#cecece" stroke-dasharray="1.5 3"/>
+      <circle cx="${E.x}" cy="${E.y}" r="7" fill="#0c0c0c"/>
+      <circle cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" r="2.4" fill="#6d6d6d"/>
+      <circle cx="${M.x}" cy="${M.y}" r="6" fill="#fff" stroke="#0c0c0c" stroke-width="1"/>
+      <g transform="translate(${p.x.toFixed(1)} ${p.y.toFixed(1)})"><path d="M0 -5 L3.4 4 L0 2.2 L-3.4 4 Z" fill="#0c0c0c" transform="rotate(${(Math.atan2(bez(Math.min(1, u + .02)).y - p.y, bez(Math.min(1, u + .02)).x - p.x) * 180 / Math.PI + 90).toFixed(0)})"/></g>
       <text x="${E.x}" y="${E.y + 22}" text-anchor="middle" class="mm-t">${t('map_earth')}</text>
       <text x="${mx.toFixed(1)}" y="${(my - 5).toFixed(1)}" text-anchor="middle" class="mm-t mm-s">${t('map_moon')}</text>
       <text x="${M.x}" y="${M.y + 18}" text-anchor="middle" class="mm-t">${t('map_mars')}</text>

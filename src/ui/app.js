@@ -18,9 +18,10 @@ function spark(key,d,s,w=120,h=26){
   const mn=Math.min(...xs), mx=Math.max(...xs), rg=(mx-mn)||1;
   const pts=xs.map((v,i)=>[(i/(Math.max(1,xs.length-1)))*w, h-3-((v-mn)/rg)*(h-6)]);
   const dpath=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
-  const c=stColor(s); const last=pts[pts.length-1];
-  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${dpath} L ${w} ${h} L 0 ${h} Z" fill="${hexA(c,0.1)}"/><path d="${dpath}" fill="none" stroke="${c}" stroke-width="1.5" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="2.2" fill="${c}"/></svg>`;
+  const last=pts[pts.length-1];
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${dpath}" fill="none" stroke="${s?stColor(s):'#0c0c0c'}" stroke-opacity="${s?1:.55}" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="2" fill="${s?stColor(s):'#0c0c0c'}"/></svg>`;
 }
+let lastScore=null;
 function tween(el,to,dec){
   const from=parseFloat(el.dataset.v); el.dataset.v=to;
   if(isNaN(from)||REDUCED||from===to){ el.firstChild.nodeValue=to.toFixed(dec); return; }
@@ -30,24 +31,25 @@ function tween(el,to,dec){
 
 const VITALS=[['hr','heart',true],['hrv','heart'],['bp','heart'],['spo2','lungs'],['temp','immune'],['sleep','brain'],['glucose','metabolic'],['mood','brain'],['water','kidneys'],['exercise','musculo']];
 function buildVitals(){
-  $('vitals').innerHTML = VITALS.map(([k,o,wide])=>`<button class="vital${wide?' wide':''}" id="v-${k}" data-organ="${o}">
-    <div class="row"><span class="name" id="vn-${k}">${mName(k)}</span><span id="vs-${k}"></span></div>
-    <div class="val"><span id="vv-${k}" data-v="">–</span><small>${METRICS[k].unit}</small></div>
-    ${wide?'<canvas id="ecg" aria-hidden="true"></canvas>':''}<div id="vsp-${k}"></div></button>`).join('');
-  $('vitals').querySelectorAll('.vital').forEach(b=>b.onclick=()=>selectOrgan(b.dataset.organ));
+  $('vitals').innerHTML = VITALS.map(([k,o,wide])=>`<button class="vrow" id="v-${k}" data-organ="${o}">
+    <span class="vrow-spark">${wide?'<canvas id="ecg" aria-hidden="true"></canvas>':`<span id="vsp-${k}"></span>`}</span>
+    <span class="vrow-main"><span class="vrow-label"><span id="vs-${k}"></span><span id="vn-${k}">${mName(k)}</span></span>
+    <span class="vrow-val"><span id="vv-${k}" data-v="">–</span><small>${METRICS[k].unit}</small></span></span></button>`).join('');
+  $('vitals').querySelectorAll('.vrow').forEach(b=>b.onclick=()=>selectOrgan(b.dataset.organ));
   attachECG($('ecg'));
 }
 function renderVitals(){
   const d=S.day, M=S.EVAL.M;
   $('vitalsDay').textContent=`${t('day')} ${d}`;
   VITALS.forEach(([k])=>{
-    const m=M[k]; const card=$('v-'+k); card.className='vital'+(k==='hr'?' wide':'')+(m.s?' st-'+m.s:'');
+    const m=M[k]; const card=$('v-'+k); card.className='vrow'+(m.s?' st-'+m.s:'');
     $('vn-'+k).textContent=mName(k);
-    const stw=t(['st0','st1','st2'][m.s]); $('vs-'+k).innerHTML=`<span title="${stw}" aria-label="${stw}" style="color:${stColor(m.s)};display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:600">${shape(m.s)}${k==='hr'?stw:''}</span>`;
+    const stw=t(['st0','st1','st2'][m.s]);
+    $('vs-'+k).innerHTML=`<span class="st c${m.s}" style="display:inline-flex;align-items:center;gap:6px">${shape(m.s)}${m.s?stw:`<span class="vh">${stw}</span>`}</span>`;
     const el=$('vv-'+k);
     if(k==='bp'){ el.dataset.v=''; el.firstChild.nodeValue=m.v; }
     else tween(el, typeof m.v==='number'?m.v:0, METRICS[k].dec);
-    $('vsp-'+k).innerHTML=spark(k,d,m.s);
+    if(k!=='hr') $('vsp-'+k).innerHTML=spark(k,d,m.s,84,28);
   });
 }
 
@@ -63,57 +65,59 @@ let packetTimer=null, packetLeft=0, packetTotal=0;
 function renderRight(){
   const R=$('right'); const E=S.EVAL;
   if(S.selected){ R.innerHTML=organDetail(S.selected); R.querySelector('.back').onclick=()=>selectOrgan(null); return; }
-  const lvl=E.score>=75?0:E.score>=50?1:2; const lab=[t('ready'),t('review'),t('notfit')][lvl]; const c=stColor(lvl);
-  const C=2*Math.PI*48, off=C*(1-E.score/100);
+  const lvl=E.score>=75?0:E.score>=50?1:2; const lab=[t('ready'),t('review'),t('notfit')][lvl];
   const rate=ENV[S.env].rate; const left=DOSE_LIMIT-E.dose; const proj=rate? Math.round(left/rate):null;
-  R.innerHTML=`
-  <div class="card fade-in">
-    <div class="head"><span class="label">${t('readiness')}</span>${pill(lvl)}</div>
-    <div class="ring-wrap">
-      <div class="ring"><svg viewBox="0 0 112 112"><circle class="bgc" cx="56" cy="56" r="48"/><circle class="fg" id="ringFg" cx="56" cy="56" r="48" stroke="${c}" stroke-dasharray="${C}" stroke-dashoffset="${C}"/></svg>
-        <div class="num"><div><b class="mono">${E.score}</b><small>/100</small></div></div></div>
-      <div><div style="font-family:var(--f-display);font-size:22px;color:${c};font-weight:600">${lab}</div>
-        <div style="font-size:12px;color:var(--muted);margin:2px 0 8px">${t('readiness_for')}</div>
-        <ul class="factors">${E.factors.length? E.factors.map(f=>`<li style="color:${stColor(f.s)}">${shape(f.s)}<span style="color:var(--text)">${f.lab}</span></li>`).join('') : `<li style="color:var(--ok)">${shape(0)}<span style="color:var(--text)">${t('no_alerts').split('.')[0]}</span></li>`}</ul></div>
-    </div>
+  const m=CREW_BY_ID[S.member], pct=Math.round(E.dose/DOSE_LIMIT*100);
+  const from = lastScore===null? E.score : lastScore;
+  R.innerHTML=`<section class="dossier">
+  <header class="who fade-in">
+    <span class="eyebrow">${t('role_'+m.role)} · “${m.callsign}”</span>
+    <h1 class="who-name">${m.name}</h1>
+    <p class="who-meta">${t('day')} ${S.day} / ${DAYS} · ${t('env_'+S.env)}</p>
+  </header>
+  <div class="verdict fade-in">
+    <span class="eyebrow">${t('readiness')} · ${t('readiness_for')}</span>
+    <div class="verdict-row"><b class="score" id="scoreNum" data-v="${from}">${from}</b><span class="score-of">/ 100</span></div>
+    <div class="verdict-word c${lvl}">${shape(lvl)}<span>${lab}</span></div>
+    <ul class="factors">${E.factors.length? E.factors.map(f=>`<li class="c${f.s}">${shape(f.s)}<span>${f.lab}</span></li>`).join('') : `<li class="c0">${shape(0)}<span>${t('no_alerts').split('.')[0]}</span></li>`}</ul>
   </div>
-  <div class="card fade-in">
-    <div class="head"><span class="label">${t('alerts')}</span><span class="label mono">${E.P.length}</span></div>
-    ${E.P.length? E.P.map(p=>`<div class="alert s${p.s}" role="button" tabindex="0" data-organ="${p.organ}" style="cursor:pointer"><div style="color:${stColor(p.s)};padding-top:3px">${shape(p.s)}</div><div><b>${p.title}</b><p>${p.desc}</p><p class="act">→ ${p.act}</p></div></div>`).join('') : `<div class="empty" style="color:var(--ok)">${shape(0)}<span style="color:var(--muted)">${t('no_alerts')}</span></div>`}
+  <div class="block fade-in">
+    <div class="block-head"><span class="eyebrow">${t('alerts')}</span><span class="eyebrow mono">${String(E.P.length).padStart(2,'0')}</span></div>
+    ${E.P.length? E.P.map(p=>`<div class="alert s${p.s}" role="button" tabindex="0" data-organ="${p.organ}"><span class="eyebrow c${p.s}">${shape(p.s)}${t(['st0','st1','st2'][p.s])} · ${ORG[p.organ][LANG].name}</span><b>${p.title}</b><p>${p.desc}</p><p class="act">→ ${p.act}</p></div>`).join('') : `<div class="empty"><span class="c0">${shape(0)}</span>${t('no_alerts')}</div>`}
   </div>
-  <div class="card fade-in">
-    <div class="head"><span class="label">${t('radiation')}</span>${pill(E.M.dose.s)}</div>
-    <div style="display:flex;align-items:baseline;gap:6px"><b class="mono" style="font-size:24px">${Math.round(E.dose)}</b><span style="color:var(--muted)">mSv · ${Math.round(E.dose/DOSE_LIMIT*100)}% ${t('career')}</span></div>
-    <div class="bar" style="margin-top:10px"><i id="doseBar" style="width:0"></i></div>
-    <div class="kv"><span>${t('rate_now')}</span><span class="mono">${rate?rate+' mSv/'+(LANG==='es'?'día':'day'):'—'}</span></div>
-    <div class="kv"><span>${t('projection')}</span><span class="mono">${proj!==null? proj+' '+t('days') : '—'}</span></div>
-  </div>
-  <div class="card fade-in">
-    <div class="head"><span class="label">${t('comms')}</span><span class="label mono">${ENV[S.env].delayTxt}</span></div>
-    <div class="kv" style="margin-top:0"><span>${t('oneway')}</span><span class="mono">${ENV[S.env].delayTxt}</span></div>
-    <button class="btn" id="sendPacket" style="width:100%;margin-top:10px">${t('send')}</button>
+  <div class="block fade-in">
+    <div class="block-head"><span class="eyebrow">${t('radiation')}</span>${pill(E.M.dose.s)}</div>
+    <div class="stat-row"><b class="stat">${Math.round(E.dose)}</b><span class="stat-unit">mSv · ${pct}% ${t('career')}</span></div>
+    <div class="bar"><i id="doseBar"></i><span class="limit"></span></div>
+    <dl class="kv-list">
+      <div><dt>${t('rate_now')}</dt><dd>${rate?rate+' mSv/'+(LANG==='es'?'día':'day'):'—'}</dd></div>
+      <div><dt>${t('projection')}</dt><dd>${proj!==null? proj+' '+t('days') : '—'}</dd></div>
+      <div><dt>${t('oneway')}</dt><dd>${ENV[S.env].delayTxt}</dd></div>
+    </dl>
+    <button class="btn block" id="sendPacket">${t('send')}</button>
     <div class="packet" id="packet"></div>
-  </div>`;
-  requestAnimationFrame(()=>{ const f=$('ringFg'); if(f) f.style.strokeDashoffset=off; const b=$('doseBar'); if(b) b.style.width=Math.min(100,E.dose/DOSE_LIMIT*100)+'%'; });
-  R.querySelectorAll('.alert').forEach(a=>{ a.onclick=()=>selectOrgan(a.dataset.organ); a.onkeydown=e=>{ if(e.key==='Enter') selectOrgan(a.dataset.organ); }; });
+  </div></section>`;
+  tween($('scoreNum'), E.score, 0); lastScore=E.score;
+  requestAnimationFrame(()=>{ const b=$('doseBar'); if(b) b.style.width=Math.min(100,pct)+'%'; });
+  R.querySelectorAll('.alert').forEach(a=>{ a.onclick=()=>selectOrgan(a.dataset.organ); a.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectOrgan(a.dataset.organ); } }; });
   $('sendPacket').onclick=sendPacket; renderPacket();
 }
 function organDetail(id){
   const o=ORG[id], L=o[LANG], E=S.EVAL, st=E.O[id];
   const rows=o.metrics.map(k=>{ const m=E.M[k]; const b=m.b===null||m.b===undefined?'—': typeof m.b==='number'? m.b.toFixed(METRICS[k].dec) : m.b;
-    return `<tr><td style="color:var(--muted)">${mName(k)}</td><td class="v"><span style="color:${stColor(m.s)}">${shape(m.s)}</span> ${fmt(m.v,METRICS[k].dec)} <span style="color:var(--muted);font-size:11px">${METRICS[k].unit}</span></td><td class="b">${b}</td><td>${['vestibular','vision','symptoms','dose'].includes(k)?'':spark(k,S.day,m.s,84,22)}</td></tr>`; }).join('');
-  const pats=E.P.filter(p=>p.organ===id).map(p=>`<div class="alert s${p.s}"><div style="color:${stColor(p.s)};padding-top:3px">${shape(p.s)}</div><div><b>${p.title}</b><p>${p.desc}</p></div></div>`).join('');
+    return `<tr><td>${mName(k)}</td><td class="v"><span class="c${m.s}">${shape(m.s)}</span>${fmt(m.v,METRICS[k].dec)} <span class="stat-unit">${METRICS[k].unit}</span></td><td class="b">${b}</td><td>${['vestibular','vision','symptoms','dose'].includes(k)?'':spark(k,S.day,m.s,72,20)}</td></tr>`; }).join('');
+  const pats=E.P.filter(p=>p.organ===id).map(p=>`<div class="alert s${p.s}"><span class="eyebrow c${p.s}">${shape(p.s)}${t(['st0','st1','st2'][p.s])}</span><b>${p.title}</b><p>${p.desc}</p></div>`).join('');
   return `<div class="fade-in">
-    <button class="back"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>${t('back')}</button>
-    <div class="detail-title"><h2>${L.name}</h2>${pill(st)}</div>
+    <button class="back"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>${t('back')}</button>
+    <div class="detail-title">${pill(st)}<h2>${L.name}</h2></div>
     <p class="what">${L.what}</p>
     ${pats}
+    <div class="card now"><span class="label">${t('what_now')}</span><p class="todo">${L.act[st]}</p></div>
     <div class="card"><table class="mtable"><tr><td class="label">${t('metric')}</td><td class="label">${t('value')}</td><td class="label">${t('base')}</td><td class="label">${t('trend')}</td></tr>${rows}</table></div>
-    <div class="card" style="border-color:${hexA(stColor(st),0.4)}"><span class="label">${t('what_now')}</span><p class="todo" style="margin-top:6px">${L.act[st]}</p></div>
-    <div class="card"><span class="label">${t('escalate')}</span><p class="todo" style="margin-top:6px;color:var(--muted)">${L.esc}</p>
-      <div class="kv"><span>${t('oneway')}</span><span class="mono">${ENV[S.env].delayTxt}</span></div></div>
-    <div class="card"><span class="label">${t('hazards_lbl')}</span><div class="chips" style="margin-top:8px">${o.hz.map(h=>`<span>${HAZ[h][LANG]}</span>`).join('')}</div></div>
-    <div class="card"><details open><summary>${t('how')} ▾</summary><ol class="steps" style="margin-top:8px">${L.how.map(s=>`<li>${s}</li>`).join('')}</ol></details></div>
+    <div class="card"><span class="label">${t('escalate')}</span><p class="todo">${L.esc}</p>
+      <dl class="kv-list"><div><dt>${t('oneway')}</dt><dd>${ENV[S.env].delayTxt}</dd></div></dl></div>
+    <div class="card"><span class="label">${t('hazards_lbl')}</span><div class="chips">${o.hz.map(h=>`<span>${HAZ[h][LANG]}</span>`).join('')}</div></div>
+    <div class="card"><details open><summary>${t('how')}</summary><ol class="steps">${L.how.map(s=>`<li>${s}</li>`).join('')}</ol></details></div>
   </div>`;
 }
 
@@ -129,7 +133,7 @@ function sendPacket(){
 function renderPacket(){
   const el=$('packet'); if(!el) return; if(!packetTotal){ el.innerHTML=''; return; }
   const m=Math.floor(packetLeft/60), s=packetLeft%60;
-  el.innerHTML = packetLeft>0 ? `<div style="margin-bottom:6px">${t('arriving')} <span class="mono" style="color:var(--text)">${m}:${String(s).padStart(2,'0')}</span></div><div class="bar"><i style="width:${(1-packetLeft/packetTotal)*100}%"></i></div>` : `<div style="color:var(--ok)">✓ ${t('delivered')} ${ENV[S.env].delayTxt}</div>`;
+  el.innerHTML = packetLeft>0 ? `<div>${t('arriving')} <b class="mono" style="color:var(--ink);font-weight:500">${m}:${String(s).padStart(2,'0')}</b></div><div class="bar"><i style="width:${(1-packetLeft/packetTotal)*100}%"></i></div>` : `<div class="ok">✓ ${t('delivered')} ${ENV[S.env].delayTxt}</div>`;
 }
 
 function renderHazards(){
@@ -218,13 +222,11 @@ document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{ setLang(b.da
 
 /* boot */
 function boot(){
-  const lines=[...document.querySelectorAll('.boot .line')];
   const finish=()=>{ $('boot').classList.add('done'); };
   $('skipBoot').onclick=finish;
   if(REDUCED){ finish(); return; }
-  requestAnimationFrame(()=>$('bootBar').style.width='100%');
-  lines.forEach((l,i)=>setTimeout(()=>l.classList.add('on'),250+i*420));
-  setTimeout(finish,2900);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>$('bootBar').style.width='100%'));
+  setTimeout(finish,2700);
 }
 
 /* init */

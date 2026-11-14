@@ -58,7 +58,7 @@ Press **Demo mode** in the top bar. It drives the real app:
 
 ## Tech
 
-Vite · vanilla ES modules · **Three.js WebGL hologram** (procedural translucent body with Fresnel rim, slice contours and scan line; organs as glowing volumes coloured by status; accessible "+" pins; camera fly-to; orbit/zoom; bloom) · Canvas 2D point-cloud hologram as the no-WebGL fallback · SVG mini-map · deterministic simulated data (seeded generator, one series per crew member) · hand-written service worker emitted at build time. Fonts bundled via Fontsource (SIL OFL): Barlow Condensed, Space Grotesk, Inter, JetBrains Mono.
+Vite · vanilla ES modules · **Three.js WebGL body** drawn like a technical plate (procedural body with anti-aliased contour lines, faint skeleton, organs as grey volumes that take a status colour only when they need attention, accessible "+" pins, camera fly-to, orbit/zoom) · Canvas 2D point-cloud hologram as the no-WebGL fallback · SVG mini-map · deterministic simulated data (seeded generator, one series per crew member) · hand-written service worker emitted at build time. Fonts bundled via Fontsource (SIL OFL): Space Grotesk and Inter. Visual language: white lab-dossier canvas with black full-bleed chapters for the boot and the solar-storm alert; colour is reserved for medical status.
 
 Code map: see [`CLAUDE.md`](CLAUDE.md). Design tokens: [`docs/design/`](docs/design). Team research notes (Spanish): [`docs/brain/`](docs/brain).
 

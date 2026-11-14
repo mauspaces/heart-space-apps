@@ -1,85 +1,88 @@
-/* WebGL hologram (Three.js): translucent procedural body with Fresnel rim, slice contours and a scan line;
-   organs as glowing volumes coloured by status; BioDigital-style "+" pins; camera fly-to; orbit/zoom; bloom.
-   Falls back silently to the Canvas 2D hologram (holo2d.js) when WebGL is unavailable.
-   Body is procedural (no external model). Coordinates match ORG[id].pos in catalog.js (y up, front = +z). */
+/* WebGL body (Three.js) drawn like a technical plate on the white lab canvas:
+   fine anti-aliased contour lines for the skin, a faint skeleton, organs as soft grey volumes that take
+   a status colour only when they need attention, BioDigital-style "+" pins, camera fly-to, orbit/zoom.
+   Procedural geometry (no external model). Coordinates match ORG[id].pos in catalog.js (y up, front = +z).
+   Falls back silently to the Canvas 2D hologram (holo2d.js) when WebGL is unavailable. */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { REDUCED, $ } from '../core/util.js';
 import { LANG, t } from '../core/i18n.js';
 import { HAZ, ORG } from '../core/catalog.js';
 import { S } from '../core/state.js';
 import { selectOrgan } from './holo2d.js';
 
-const STATUS = [new THREE.Color('#3CF0A8'), new THREE.Color('#F5B841'), new THREE.Color('#FF4D5E')];
-const HOLO = new THREE.Color('#5BD6FF');
+const INK = new THREE.Color('#0c0c0c');
+const NEUTRAL = new THREE.Color('#8f949b');
+const STATUS = [NEUTRAL, new THREE.Color('#B45309'), new THREE.Color('#D92D20')];
+const DIM = new THREE.Color('#c9c9c9');
 const SHAPE = ['●', '▲', '◆'];
 
 const VERT = `varying vec3 vN; varying vec3 vV; varying vec3 vW;
 void main(){ vec4 wp=modelMatrix*vec4(position,1.); vW=wp.xyz; vN=normalize(mat3(modelMatrix)*normal); vV=normalize(cameraPosition-wp.xyz); gl_Position=projectionMatrix*viewMatrix*wp; }`;
-const FRAG = `uniform vec3 uColor; uniform float uTime,uScanY,uBase,uRim,uLine,uAlpha,uScan;
+/* contour lines every 1/uFreq m along y, 1px wide on screen thanks to fwidth; a slow scan darkens them */
+const FRAG = `uniform vec3 uColor; uniform float uScanY,uBase,uRim,uLine,uFreq,uAlpha,uScan,uBack;
 varying vec3 vN; varying vec3 vV; varying vec3 vW;
-float h(vec2 p){return fract(sin(dot(p,vec2(12.9898,78.233)))*43758.5453);}
 void main(){
-  float f=pow(1.-abs(dot(normalize(vN),normalize(vV))),2.3);
-  float line=smoothstep(.93,1.,abs(sin(vW.y*70.)));
-  float scan=exp(-abs(vW.y-uScanY)*60.)*uScan;
-  float n=h(floor(vW.xy*110.)+floor(uTime*7.))*.05;
-  float a=(uBase+f*uRim+line*uLine+scan*.7+n)*uAlpha;
-  gl_FragColor=vec4(uColor*(1.+scan*1.6),a);
+  float f=pow(1.-abs(dot(normalize(vN),normalize(vV))),2.);
+  float y=vW.y*uFreq;
+  float d=abs(fract(y-.5)-.5)/max(fwidth(y),1e-4);
+  float line=1.-min(d,1.);
+  float scan=exp(-abs(vW.y-uScanY)*35.)*uScan;
+  float a=uBase+f*uRim+line*(uLine+scan*.45);
+  a*=gl_FrontFacing?1.:uBack;
+  gl_FragColor=vec4(uColor,clamp(a*uAlpha,0.,1.));
 }`;
-function holoMat(color, o) {
+function mat(color, o) {
   return new THREE.ShaderMaterial({
-    vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending,
-    uniforms: { uColor: { value: color.clone() }, uTime: { value: 0 }, uScanY: { value: 0 }, uBase: { value: o.base }, uRim: { value: o.rim }, uLine: { value: o.line }, uAlpha: { value: o.alpha ?? 1 }, uScan: { value: o.scan ?? 1 } },
+    vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, side: THREE.DoubleSide,
+    uniforms: {
+      uColor: { value: color.clone() }, uScanY: { value: -9 }, uBase: { value: o.base }, uRim: { value: o.rim },
+      uLine: { value: o.line }, uFreq: { value: o.freq ?? 55 }, uAlpha: { value: 1 }, uScan: { value: o.scan ?? 1 }, uBack: { value: o.back ?? .35 },
+    },
   });
 }
 
-/* ---------- geometry helpers ---------- */
-const v3 = (a) => new THREE.Vector3(a[0], a[1], a[2]);
-function limb(A, B, r0, r1, mat) {
+/* ---------- procedural anatomy ---------- */
+const v3 = a => new THREE.Vector3(a[0], a[1], a[2]);
+function limb(A, B, r0, r1, m, seg = 28) {
   const a = v3(A), b = v3(B), len = a.distanceTo(b);
-  const g = new THREE.CylinderGeometry(r1, r0, len, 14, 1, false);
-  const m = new THREE.Mesh(g, mat);
-  m.position.copy(a).add(b).multiplyScalar(0.5);
-  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
-  return m;
+  const mesh = new THREE.Mesh(new THREE.CylinderGeometry(r1, r0, len, seg, 1, true), m);
+  mesh.position.copy(a).add(b).multiplyScalar(0.5);
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
+  return mesh;
 }
-function ellipsoid(c, r, mat, seg = 20) {
-  const m = new THREE.Mesh(new THREE.SphereGeometry(1, seg, Math.round(seg * 0.75)), mat);
-  m.position.set(c[0], c[1], c[2]); m.scale.set(r[0], r[1], r[2]);
-  return m;
+function ellipsoid(c, r, m, seg = 32) {
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(1, seg, Math.round(seg * 0.75)), m);
+  mesh.position.set(c[0], c[1], c[2]); mesh.scale.set(r[0], r[1], r[2]);
+  return mesh;
 }
-function buildBody(mat) {
+function buildBody(m) {
   const g = new THREE.Group();
-  // torso + neck: lathe through the same radius profile as the 2D hologram, flattened front-to-back
-  const RX = [[0.9, .17], [0.97, .185], [1.04, .165], [1.1, .148], [1.2, .16], [1.3, .188], [1.38, .2], [1.43, .19], [1.46, .15], [1.485, .08], [1.5, .05], [1.55, .048]];
-  const torso = new THREE.Mesh(new THREE.LatheGeometry(RX.map(([y, r]) => new THREE.Vector2(r, y)), 40), mat);
+  const RX = [[0.88, .05], [0.9, .165], [0.97, .182], [1.04, .163], [1.1, .147], [1.2, .158], [1.3, .186], [1.38, .198], [1.43, .188], [1.46, .15], [1.485, .085], [1.5, .052], [1.56, .05], [1.57, .03]];
+  const torso = new THREE.Mesh(new THREE.LatheGeometry(RX.map(([y, r]) => new THREE.Vector2(r, y)), 64), m);
   torso.scale.z = 0.62; g.add(torso);
-  g.add(ellipsoid([0, 1.635, 0.012], [.09, .125, .105], mat, 28)); // head
+  g.add(ellipsoid([0, 1.64, 0.012], [.088, .118, .103], m, 48));
   for (const s of [1, -1]) {
-    g.add(ellipsoid([s * 0.2, 1.41, 0], [.065, .065, .06], mat)); // shoulder
-    g.add(limb([s * 0.215, 1.4, 0], [s * 0.255, 1.13, 0], .047, .04, mat));
-    g.add(limb([s * 0.255, 1.13, 0], [s * 0.285, 0.88, 0.05], .038, .03, mat));
-    g.add(ellipsoid([s * 0.29, 0.8, 0.06], [.03, .065, .022], mat, 14)); // hand
-    g.add(limb([s * 0.09, 0.92, 0], [s * 0.1, 0.5, 0.01], .08, .057, mat));
-    g.add(limb([s * 0.1, 0.5, 0.01], [s * 0.1, 0.1, 0], .055, .037, mat));
-    g.add(ellipsoid([s * 0.1, 0.04, 0.05], [.045, .04, .11], mat, 14)); // foot
+    g.add(ellipsoid([s * 0.198, 1.415, 0], [.062, .06, .058], m));
+    g.add(limb([s * 0.212, 1.405, 0], [s * 0.252, 1.13, 0], .046, .039, m));
+    g.add(ellipsoid([s * 0.252, 1.13, 0], [.039, .039, .039], m, 20));
+    g.add(limb([s * 0.252, 1.13, 0], [s * 0.283, 0.88, 0.05], .037, .029, m));
+    g.add(ellipsoid([s * 0.288, 0.81, 0.058], [.029, .064, .02], m, 20));
+    g.add(limb([s * 0.09, 0.93, 0], [s * 0.1, 0.5, 0.01], .082, .056, m));
+    g.add(ellipsoid([s * 0.1, 0.5, 0.01], [.056, .05, .054], m, 20));
+    g.add(limb([s * 0.1, 0.5, 0.01], [s * 0.1, 0.09, 0], .054, .036, m));
+    g.add(ellipsoid([s * 0.1, 0.04, 0.05], [.044, .038, .108], m, 20));
   }
   return g;
 }
 function buildSkeleton() {
-  const pts = [];
-  const seg = (A, B) => pts.push(...A, ...B);
-  seg([0, 0.95, -0.07], [0, 1.5, -0.03]); // spine
+  const pts = [], seg = (A, B) => pts.push(...A, ...B);
+  seg([0, 0.95, -0.07], [0, 1.5, -0.03]);
   for (const s of [1, -1]) {
     seg([s * 0.09, 0.9, 0], [s * 0.1, 0.52, 0.01]); seg([s * 0.1, 0.48, 0.01], [s * 0.1, 0.12, 0]);
     seg([s * 0.215, 1.39, 0], [s * 0.25, 1.14, 0]); seg([s * 0.25, 1.12, 0], [s * 0.28, 0.9, 0.045]);
-    seg([0, 1.44, 0.03], [s * 0.19, 1.43, 0]); // clavicle
-    for (let y = 1.18; y <= 1.4; y += 0.04) { // ribs
+    seg([0, 1.44, 0.03], [s * 0.19, 1.43, 0]);
+    for (let y = 1.18; y <= 1.4; y += 0.04) {
       let prev = null;
       for (let a = 0; a <= 1.001; a += 0.1) {
         const ang = -Math.PI / 2 + a * Math.PI, k = 0.15 * (1 - (1.4 - y) * 0.8);
@@ -89,30 +92,30 @@ function buildSkeleton() {
     }
   }
   const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-  return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: 0xc8e6ff, transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false }));
+  return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.13, depthWrite: false }));
 }
-
-/* organ volumes: id → list of meshes sharing one material */
 function buildOrgans() {
   const root = new THREE.Group(), M = {};
-  const add = (id, mesh) => { (M[id] ||= { meshes: [], mat: holoMat(HOLO, { base: .3, rim: 1.1, line: 0, alpha: .9 }) }); mesh.material = M[id].mat; mesh.userData.organ = id; M[id].meshes.push(mesh); root.add(mesh); };
-  const dummy = new THREE.MeshBasicMaterial();
-  add('brain', ellipsoid([0, 1.665, 0.008], [.074, .064, .086], dummy, 28));
-  for (const s of [1, -1]) add('eyes', ellipsoid([s * 0.032, 1.64, 0.09], [.015, .012, .012], dummy, 12));
-  for (const s of [1, -1]) add('ear', ellipsoid([s * 0.088, 1.625, 0], [.013, .017, .013], dummy, 12));
-  add('heart', ellipsoid([0.035, 1.3, 0.05], [.045, .055, .04], dummy, 24));
-  for (const s of [1, -1]) add('lungs', ellipsoid([s * 0.09, 1.335, 0], [.066, .11, .065], dummy, 24));
-  add('immune', ellipsoid([0, 1.4, 0.06], [.025, .03, .015], dummy, 12));
-  add('immune', ellipsoid([0.09, 1.15, -0.02], [.03, .035, .025], dummy, 14));
-  for (const s of [1, -1]) add('immune', ellipsoid([s * 0.05, 1.5, 0.03], [.012, .012, .012], dummy, 8));
-  add('metabolic', ellipsoid([-0.07, 1.17, 0.03], [.085, .045, .06], dummy, 20));
-  for (const s of [1, -1]) add('kidneys', ellipsoid([s * 0.07, 1.07, -0.06], [.022, .04, .018], dummy, 14));
-  for (const s of [1, -1]) { add('musculo', limb([s * 0.09, 0.9, 0], [s * 0.1, 0.52, 0.01], .014, .012, dummy)); add('musculo', limb([s * 0.1, 0.48, 0.01], [s * 0.1, 0.12, 0], .012, .01, dummy)); }
-  const box = new THREE.Mesh(new THREE.BoxGeometry(.03, .04, .01), dummy); box.position.set(-0.125, 1.405, 0.125); add('dosimeter', box);
+  const add = (id, mesh) => {
+    if (!M[id]) M[id] = { meshes: [], mat: mat(NEUTRAL, { base: .16, rim: .5, line: 0, scan: 0, back: .5 }) };
+    mesh.material = M[id].mat; mesh.userData.organ = id; mesh.renderOrder = 0; M[id].meshes.push(mesh); root.add(mesh);
+  };
+  const tmp = new THREE.MeshBasicMaterial();
+  add('brain', ellipsoid([0, 1.665, 0.008], [.074, .064, .086], tmp, 40));
+  for (const s of [1, -1]) add('eyes', ellipsoid([s * 0.032, 1.64, 0.09], [.015, .012, .012], tmp, 16));
+  for (const s of [1, -1]) add('ear', ellipsoid([s * 0.088, 1.625, 0], [.013, .017, .013], tmp, 16));
+  add('heart', ellipsoid([0.035, 1.3, 0.05], [.045, .055, .04], tmp, 32));
+  for (const s of [1, -1]) add('lungs', ellipsoid([s * 0.09, 1.335, 0], [.062, .105, .06], tmp, 32));
+  add('immune', ellipsoid([0, 1.4, 0.06], [.025, .03, .015], tmp, 16));
+  add('immune', ellipsoid([0.09, 1.15, -0.02], [.03, .035, .025], tmp, 16));
+  for (const s of [1, -1]) add('immune', ellipsoid([s * 0.05, 1.5, 0.03], [.012, .012, .012], tmp, 12));
+  add('metabolic', ellipsoid([-0.07, 1.17, 0.03], [.082, .043, .058], tmp, 28));
+  for (const s of [1, -1]) add('kidneys', ellipsoid([s * 0.07, 1.07, -0.06], [.022, .04, .018], tmp, 20));
+  for (const s of [1, -1]) { add('musculo', limb([s * 0.09, 0.9, 0], [s * 0.1, 0.52, 0.01], .013, .011, tmp, 12)); add('musculo', limb([s * 0.1, 0.48, 0.01], [s * 0.1, 0.12, 0], .011, .009, tmp, 12)); }
+  const box = new THREE.Mesh(new THREE.BoxGeometry(.03, .04, .01), tmp); box.position.set(-0.125, 1.405, 0.125); add('dosimeter', box);
   return { root, M };
 }
 
-/* where to put the camera for each organ (angle around the body, radians; 0 = front) */
 const VIEW = { kidneys: Math.PI, ear: Math.PI / 2 };
 const viewAngle = id => VIEW[id] ?? 0.22 * Math.sign(ORG[id].pos[0] || 1);
 const easeOut = u => 1 - Math.pow(1 - u, 3);
@@ -127,57 +130,67 @@ export function init3D() {
   } catch (e) { return false; }
 
   const cv = renderer.domElement; cv.id = 'holo3d'; cv.setAttribute('role', 'img');
-  cv.setAttribute('aria-label', 'Interactive 3D hologram of the astronaut\'s body. Use the organ pins to inspect each system.');
+  cv.setAttribute('aria-label', 'Interactive 3D model of the astronaut\'s body. Use the organ pins to inspect each system.');
   cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab';
   host.insertBefore(cv, old); old.style.display = 'none'; S.use3d = true;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.75));
-  renderer.setClearColor(0x03050a, 1);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setClearColor(0xffffff, 1);
 
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(32, 1, 0.05, 30);
-  const HOME = { pos: new THREE.Vector3(1.55, 1.2, 3.15), target: new THREE.Vector3(0, 0.88, 0) };
+  const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 40);
+  const HOME = { pos: new THREE.Vector3(1.55, 1.18, 4.9), target: new THREE.Vector3(0, 0.86, 0) };
   camera.position.copy(HOME.pos);
   const controls = new OrbitControls(camera, cv);
   controls.target.copy(HOME.target); controls.enableDamping = !REDUCED; controls.dampingFactor = 0.08;
-  controls.minDistance = 0.35; controls.maxDistance = 5; controls.enablePan = false; controls.maxPolarAngle = Math.PI * 0.62;
-  controls.autoRotateSpeed = 0.7;
+  controls.minDistance = 0.4; controls.maxDistance = 6; controls.enablePan = false; controls.maxPolarAngle = Math.PI * 0.62;
+  controls.autoRotateSpeed = 0.55;
 
-  const bodyMat = holoMat(HOLO, { base: .012, rim: .5, line: .1, alpha: 1 }); bodyMat.side = THREE.FrontSide;
-  const body = buildBody(bodyMat); scene.add(body);
-  scene.add(buildSkeleton());
+  const skin = mat(INK, { base: 0, rim: .16, line: .3, freq: 60, back: .22 });
+  const body = buildBody(skin); body.traverse(o => { o.renderOrder = 2; }); scene.add(body);
+  const skeleton = buildSkeleton(); skeleton.renderOrder = 1; scene.add(skeleton);
   const { root: organRoot, M: ORGANS } = buildOrgans(); scene.add(organRoot);
 
-  // platform
-  const ringMat = new THREE.MeshBasicMaterial({ color: HOLO, transparent: true, opacity: 0.35, side: THREE.DoubleSide, blending: THREE.AdditiveBlending, depthWrite: false });
-  const ring = (r0, r1, op) => { const m = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 96), ringMat.clone()); m.material.opacity = op; m.rotation.x = -Math.PI / 2; m.position.y = 0.002; scene.add(m); return m; };
-  ring(0.415, 0.425, 0.5); ring(0.595, 0.6, 0.22);
-  const ticks = new THREE.Group(); for (let i = 0; i < 48; i++) { const a = i / 48 * Math.PI * 2, r = 0.46; const tk = new THREE.Mesh(new THREE.PlaneGeometry(0.004, i % 4 ? 0.025 : 0.05), ringMat.clone()); tk.material.opacity = i % 4 ? 0.2 : 0.55; tk.position.set(Math.cos(a) * r, 0.002, Math.sin(a) * r); tk.rotation.set(-Math.PI / 2, 0, -a + Math.PI / 2); ticks.add(tk); } scene.add(ticks);
+  // floor: calibration rings and ticks
+  const ringMat = op => new THREE.MeshBasicMaterial({ color: INK, transparent: true, opacity: op, side: THREE.DoubleSide, depthWrite: false });
+  const ring = (r0, r1, op) => { const m = new THREE.Mesh(new THREE.RingGeometry(r0, r1, 128), ringMat(op)); m.rotation.x = -Math.PI / 2; m.position.y = 0.001; scene.add(m); };
+  ring(0.42, 0.423, 0.55); ring(0.6, 0.602, 0.22);
+  const ticks = new THREE.Group();
+  for (let i = 0; i < 72; i++) {
+    const a = i / 72 * Math.PI * 2, long = i % 6 === 0;
+    const tk = new THREE.Mesh(new THREE.PlaneGeometry(0.0025, long ? 0.04 : 0.018), ringMat(long ? 0.5 : 0.25));
+    const r = 0.445 + (long ? 0.01 : 0.001);
+    tk.position.set(Math.cos(a) * r, 0.001, Math.sin(a) * r); tk.rotation.set(-Math.PI / 2, 0, -a + Math.PI / 2); ticks.add(tk);
+  }
+  scene.add(ticks);
 
-  // post-processing
-  const composer = new EffectComposer(renderer);
-  composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.5, 0.45, 0.32); composer.addPass(bloom);
-  composer.addPass(new OutputPass());
-
-  // pins (accessible buttons projected over the canvas)
+  // pins: real buttons projected over the canvas (keyboard and screen-reader accessible)
   const pinsEl = document.createElement('div'); pinsEl.id = 'pins'; host.insertBefore(pinsEl, $('tip'));
   const PINS = {};
   for (const id in ORG) {
     const b = document.createElement('button'); b.className = 'pin'; b.type = 'button'; b.dataset.organ = id;
-    b.innerHTML = '<span class="pin-dot" aria-hidden="true">+</span><span class="pin-lab"></span>';
+    b.innerHTML = '<span class="pin-dot" aria-hidden="true"></span><span class="pin-lab"></span>';
     b.onclick = () => selectOrgan(S.selected === id ? null : id);
-    pinsEl.appendChild(b); PINS[id] = { el: b, lab: b.querySelector('.pin-lab'), dot: b.querySelector('.pin-dot'), key: '' };
+    pinsEl.appendChild(b); PINS[id] = { el: b, lab: b.querySelector('.pin-lab'), key: '' };
   }
 
+  /* centre the body in the free area between the dossier and the rail (desktop) */
+  function viewOffset(w, h) {
+    const L = document.querySelector('.dossier-col'), R = document.querySelector('.rail-col');
+    const top = document.querySelector('.top'), tl = document.querySelector('.timeline');
+    if (window.innerWidth <= 1100 || !L || !R || !top || !tl) { camera.clearViewOffset(); return; }
+    const hb = host.getBoundingClientRect();
+    const lx = L.getBoundingClientRect().right - hb.left, rx = R.getBoundingClientRect().left - hb.left;
+    const ty = top.getBoundingClientRect().bottom - hb.top, by = tl.getBoundingClientRect().top - hb.top;
+    camera.setViewOffset(w, h, -((lx + rx) / 2 - w / 2), -((ty + by) / 2 - h / 2), w, h);
+  }
   function resize() {
     const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return;
-    renderer.setSize(w, h, false); composer.setSize(w, h); bloom.setSize(w / 2, h / 2);
-    camera.aspect = w / h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false); camera.aspect = w / h; viewOffset(w, h); camera.updateProjectionMatrix();
   }
-  new ResizeObserver(resize).observe(host); resize();
+  new ResizeObserver(resize).observe(host); window.addEventListener('resize', resize); resize();
 
-  // interaction: click an organ in the volume, ignore drags
-  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let down = null, lastInteract = 0;
+  // click an organ volume; ignore drags
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(); let down = null, lastInteract = 0, fly = null;
   controls.addEventListener('start', () => { lastInteract = performance.now(); fly = null; });
   cv.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY }; cv.style.cursor = 'grabbing'; });
   cv.addEventListener('pointerup', e => {
@@ -190,21 +203,19 @@ export function init3D() {
     if (hit) selectOrgan(hit.object.userData.organ); else if (S.selected) selectOrgan(null);
   });
 
-  // camera fly-to
-  let fly = null, lastSel = undefined;
-  function flyTo(pos, target, ms = 900) {
+  function flyTo(pos, target, ms = 1000) {
     if (REDUCED) { camera.position.copy(pos); controls.target.copy(target); controls.update(); return; }
     fly = { t0: performance.now(), ms, p0: camera.position.clone(), p1: pos, g0: controls.target.clone(), g1: target };
   }
   function onSelect(id) {
     if (!id) { flyTo(HOME.pos, HOME.target); return; }
-    const o = ORG[id], c = v3(o.pos), a = viewAngle(id), d = id === 'dosimeter' ? 1.05 : 0.95;
-    flyTo(new THREE.Vector3(c.x + Math.sin(a) * d, c.y + 0.03, c.z + Math.cos(a) * d), c);
+    const c = v3(ORG[id].pos), a = viewAngle(id), d = id === 'dosimeter' ? 1.15 : 1.0;
+    flyTo(new THREE.Vector3(c.x + Math.sin(a) * d, c.y + 0.05, c.z + Math.cos(a) * d), c);
   }
 
-  const col = new THREE.Color();
-  const hudScan = $('hudScan'), hudYaw = $('hudYaw'), rot = $('btnRotate');
-  const tmp = new THREE.Vector3();
+  const col = new THREE.Color(), tmp = new THREE.Vector3();
+  const rot = $('btnRotate'), hudYaw = $('hudYaw');
+  let lastSel;
   function frame(ts) {
     requestAnimationFrame(frame);
     const time = ts / 1000, E = S.EVAL;
@@ -217,43 +228,42 @@ export function init3D() {
     controls.autoRotate = !REDUCED && rot && rot.getAttribute('aria-pressed') === 'true' && !S.selected && performance.now() - lastInteract > 2500;
     controls.update();
 
-    const scanN = REDUCED ? -1 : (time / 4.2) % 1, scanY = scanN < 0 ? -9 : 0.02 + (0.5 - 0.5 * Math.cos(scanN * Math.PI * 2)) * 1.7;
-    const dim = S.hazard ? 0.5 : 1;
-    bodyMat.uniforms.uTime.value = time; bodyMat.uniforms.uScanY.value = scanY; const camDist = camera.position.distanceTo(controls.target); // skin fades out when the camera is close to an organ
-    bodyMat.uniforms.uAlpha.value = dim * (0.3 + 0.7 * Math.min(1, Math.max(0, (camDist - 0.6) / 1.4))); bodyMat.uniforms.uScan.value = REDUCED ? 0 : 1;
-    ticks.rotation.y = time * 0.15;
+    const scanY = REDUCED ? -9 : 0.02 + (0.5 - 0.5 * Math.cos(((time / 6) % 1) * Math.PI * 2)) * 1.7;
+    const camDist = camera.position.distanceTo(controls.target);
+    skin.uniforms.uScanY.value = scanY;
+    skin.uniforms.uAlpha.value = (S.hazard ? 0.55 : 1) * (0.35 + 0.65 * Math.min(1, Math.max(0, (camDist - 0.7) / 1.6)));
+    ticks.rotation.y = REDUCED ? 0 : time * 0.04;
 
     for (const id in ORGANS) {
       const st = E ? E.O[id] : 0, aff = !S.hazard || HAZ[S.hazard].organs.includes(id), sel = S.selected === id;
       const u = ORGANS[id].mat.uniforms;
-      if (aff) col.copy(STATUS[st]); else col.set('#59607a');
-      u.uColor.value.copy(col); u.uTime.value = time; u.uScanY.value = scanY; u.uScan.value = REDUCED ? 0 : 0.5;
-      const pulse = st > 0 && !REDUCED ? 0.75 + 0.25 * Math.sin(time * 4) : 1;
-      u.uAlpha.value = (aff ? (sel ? 1.5 : 1) : 0.22) * pulse;
+      col.copy(aff ? STATUS[st] : DIM); u.uColor.value.copy(col);
+      const pulse = st > 0 && !REDUCED ? 0.82 + 0.18 * Math.sin(time * 3.2) : 1;
+      u.uBase.value = st > 0 ? 0.4 : 0.14;
+      u.uRim.value = st > 0 ? 0.5 : 0.45;
+      u.uAlpha.value = (aff ? (sel ? 1.35 : 1) : 0.5) * pulse;
     }
 
-    // pins: project, hide when on the far side of the body
     const w = host.clientWidth, h = host.clientHeight;
     for (const id in PINS) {
       const P = PINS[id], o = ORG[id], st = E ? E.O[id] : 0, aff = !S.hazard || HAZ[S.hazard].organs.includes(id);
       tmp.set(o.pos[0], o.pos[1], o.pos[2]);
-                  // rough occlusion: hide pins of the far side of the body (back organs from the front and vice versa)
+      // rough occlusion: hide pins of the far side (back organs from the front and vice versa)
       const behind = o.pos[2] < -0.02 ? camera.position.z > 0.3 : o.pos[2] > 0.02 ? camera.position.z < -0.3 : false;
       tmp.project(camera);
       const vis = tmp.z < 1 && !behind;
       P.el.style.transform = `translate(${((tmp.x * 0.5 + 0.5) * w).toFixed(1)}px,${((-tmp.y * 0.5 + 0.5) * h).toFixed(1)}px)`;
-      P.el.style.opacity = vis ? (aff ? 1 : 0.3) : 0; P.el.style.pointerEvents = vis ? 'auto' : 'none'; P.el.tabIndex = vis ? 0 : -1;
+      P.el.style.opacity = vis ? (aff ? 1 : 0.35) : 0; P.el.style.pointerEvents = vis ? 'auto' : 'none'; P.el.tabIndex = vis ? 0 : -1;
       const key = `${LANG}|${st}|${S.selected === id}`;
       if (key !== P.key) {
         P.key = key; const name = o[LANG].name, stw = t(['st0', 'st1', 'st2'][st]);
-        P.lab.innerHTML = `<b>${name}</b><span class="s${st}">${SHAPE[st]} ${stw}</span>`;
-        P.el.className = `pin st${st}${S.selected === id ? ' sel' : ''}`; P.el.setAttribute('aria-label', `${name}: ${stw}`);
-        P.el.setAttribute('aria-pressed', String(S.selected === id));
+        P.lab.innerHTML = `<b>${name}</b><span class="c${st}">${SHAPE[st]} ${stw}</span>`;
+        P.el.className = `pin st${st}${S.selected === id ? ' sel' : ''}`;
+        P.el.setAttribute('aria-label', `${name}: ${stw}`); P.el.setAttribute('aria-pressed', String(S.selected === id));
       }
     }
-    if (hudScan) hudScan.textContent = 'SCAN ' + String(Math.round((scanY < 0 ? 1 : scanY / 1.72) * 100)).padStart(2, '0') + '%';
     if (hudYaw) hudYaw.textContent = Math.round(((Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z) * 180 / Math.PI) + 360) % 360) + '°';
-    composer.render();
+    renderer.render(scene, camera);
   }
   requestAnimationFrame(frame);
   return true;
