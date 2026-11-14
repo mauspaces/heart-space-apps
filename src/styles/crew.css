@@ -95,3 +95,9 @@
 .portrait-init{display:grid}
 .portrait img{z-index:1}
 .portrait .ai-mark{z-index:2}
+
+/* framing: head and shoulders in the Crew view, a tight face crop in the dossier */
+.portrait img{object-position:50% 30%}
+.portrait.sm img{transform:scale(1.55);transform-origin:50% 30%}
+.portrait{background:#f2f2f2}
+@media (min-width:641px){.crew-card .portrait{aspect-ratio:auto;height:clamp(260px,26vw,340px)}}
