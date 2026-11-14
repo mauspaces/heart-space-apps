@@ -1,1 +1,9 @@
 /* Lane B — Earth–Moon–Mars mini-map. */
+#minimap{position:absolute;left:16px;top:62px;width:236px;pointer-events:none;z-index:2}
+.mm{border:1px solid var(--line);border-radius:12px;background:rgba(14,15,24,.72);padding:8px 10px 6px}
+.mm-head,.mm-foot{display:flex;justify-content:space-between;gap:8px;font-size:10px;color:var(--muted)}
+.mm-head .mono{color:var(--text);font-size:11px}
+.mm svg{display:block;width:100%;height:auto;margin:2px 0}
+.mm-t{font:600 8px var(--f-ui);fill:#C9CEDA;letter-spacing:.04em}
+.mm-s{font-size:6.5px;fill:var(--muted)}
+@media (max-width:1180px){#minimap{top:auto;bottom:112px;left:12px;width:190px}.mm-foot span:last-child{display:none}}

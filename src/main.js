@@ -15,3 +15,8 @@ import './styles/demo.css';
 import './ui/crew.js';
 import './ui/minimap.js';
 import './ui/demo.js';
+
+/* Offline after first load (production build only). */
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+}
