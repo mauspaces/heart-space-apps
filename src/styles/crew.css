@@ -101,3 +101,5 @@
 .portrait.sm img{transform:scale(1.55);transform-origin:50% 30%}
 .portrait{background:#f2f2f2}
 @media (min-width:641px){.crew-card .portrait{aspect-ratio:auto;height:clamp(260px,26vw,340px)}}
+/* portraits keep the full 4:5 frame so the suit patch is never cut */
+@media (min-width:641px){.crew-card .portrait{height:clamp(260px,26vw,340px);width:auto;aspect-ratio:4/5;max-width:100%}}
