@@ -33,7 +33,7 @@ npm run dev      # http://localhost:5173
 npm run build    # static site in dist/
 ```
 
-## Code map (Vite + vanilla ES modules, Three.js installed but not used yet)
+## Code map (Vite + vanilla ES modules, Three.js WebGL hologram in )
 
 | File | What it holds |
 |---|---|
@@ -58,6 +58,10 @@ Verified behaviour that must not regress (Mars transit): day 139 → "Possible e
 
 - **Design = hybrid.** Structure from `DESIGN-spacex.md`: near-black canvas, 1px hairlines, uppercase condensed display type with positive tracking, ghost pill buttons, no drop shadows or decorative gradients in the chrome. Colour only for data, from `DESIGN.md`: `holo #5BD6FF`, `ok #3CF0A8`, `warn #F5B841`, `bad #FF4D5E`, `earth #4EA8DE`, `mars #D9653B`. Mono font for telemetry. For the display face use an OFL condensed font bundled via `@fontsource` (e.g. Barlow Condensed); do not load fonts from a CDN.
 - **3D** comes last and only if budget remains (task D1).
+
+## Status (updated)
+
+Done and pushed: A1 crew data, A2 Crew view + switcher, A3 contagion + privacy, B1 hybrid visual pass, B2 mini-map, B3 offline service worker, B4 README + GitHub Pages workflow, C1 demo mode, D1 WebGL hologram (, loaded as its own chunk;  is the fallback and still drives the ECG). Remaining work is polish and the submission material (screenshots, 7 slides). The original task list below is kept for reference.
 
 ## Tasks
 

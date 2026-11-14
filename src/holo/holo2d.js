@@ -146,7 +146,7 @@ export function frame(ts){
   V.yaw += angDiff(V.yaw,T.yaw)*k; V.pitch += (T.pitch-V.pitch)*k; V.zoom += (T.zoom-V.zoom)*k; V.cx += (T.cx-V.cx)*k; V.cy += (T.cy-V.cy)*k;
   scan = REDUCED? -1 : (ts/4200)%1;
   const scanY = scan<0? -1 : 0.02 + (0.5-0.5*Math.cos(scan*Math.PI*2))*1.74;
-  if(W>0&&H>0){
+  if(W>0&&H>0&&!S.use3d){
     ctx.clearRect(0,0,W,H); prep();
     drawFloor();
     const dim = S.hazard?0.45:1;

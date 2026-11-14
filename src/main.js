@@ -14,6 +14,7 @@ import './ui/app.js';
 import './styles/crew.css';
 import './styles/minimap.css';
 import './styles/demo.css';
+import './styles/holo3d.css';
 import './ui/crew.js';
 import './ui/minimap.js';
 import './ui/demo.js';
@@ -22,3 +23,6 @@ import './ui/demo.js';
 if ('serviceWorker' in navigator && import.meta.env.PROD) {
   window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
 }
+
+/* WebGL hologram, loaded as its own chunk; the Canvas 2D hologram stays as the fallback. */
+import('./holo/holo3d.js').then(mod => mod.init3D()).catch(() => {});

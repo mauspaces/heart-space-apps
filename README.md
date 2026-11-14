@@ -12,7 +12,7 @@ A personal health console that runs entirely on board (offline-first) and helps 
 
 - **Personal baselines, not population averages.** Every astronaut is compared with their own days 1–14.
 - **Combined-pattern alerts.** NASA notes that spaceflight hazards feed each other, so the engine looks at patterns (e.g. lower HRV + shorter sleep + rising temperature → possible early infection, *before* fever), not isolated numbers.
-- **Interactive body hologram.** Tap an organ to see what it does, today vs. baseline, a 30-day trend, what to do now, when to escalate and how to measure it. The five NASA hazards filter which organs light up.
+- **Interactive 3D body hologram.** Tap an organ or its "+" pin to see what it does, today vs. baseline, a 30-day trend, what to do now, when to escalate and how to measure it. The five NASA hazards filter which organs light up.
 - **Readiness for a critical task** (EVA readiness score: Ready / Review / Not fit).
 - **Crew view** for the Crew Medical Officer: four fictional astronauts, status shape + colour, readiness, top alert, contagion alert, and a per-astronaut privacy switch (share with crew / share with Earth).
 - **Environments:** ISS (≈0.5 s delay, 0.5 mSv/day) · Mars transit (≤20 min, 1.8 mSv/day) · Mars surface (≤20 min, 0.67 mSv/day, 0.38 g) · Lunar base (≈1.3 s, 0.17 g).
@@ -58,7 +58,7 @@ Press **Demo mode** in the top bar. It drives the real app:
 
 ## Tech
 
-Vite · vanilla ES modules · Canvas 2D hologram (procedural point cloud, no external models) · SVG mini-map · deterministic simulated data (seeded generator, one series per crew member) · hand-written service worker emitted at build time. Fonts bundled via Fontsource (SIL OFL): Barlow Condensed, Space Grotesk, Inter, JetBrains Mono. Three.js is installed for a planned WebGL hologram; the 2D hologram is the current renderer and the no-WebGL fallback.
+Vite · vanilla ES modules · **Three.js WebGL hologram** (procedural translucent body with Fresnel rim, slice contours and scan line; organs as glowing volumes coloured by status; accessible "+" pins; camera fly-to; orbit/zoom; bloom) · Canvas 2D point-cloud hologram as the no-WebGL fallback · SVG mini-map · deterministic simulated data (seeded generator, one series per crew member) · hand-written service worker emitted at build time. Fonts bundled via Fontsource (SIL OFL): Barlow Condensed, Space Grotesk, Inter, JetBrains Mono.
 
 Code map: see [`CLAUDE.md`](CLAUDE.md). Design tokens: [`docs/design/`](docs/design). Team research notes (Spanish): [`docs/brain/`](docs/brain).
 
