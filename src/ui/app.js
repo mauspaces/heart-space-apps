@@ -3,7 +3,8 @@ import { REDUCED, clamp, $, stColor, hexA } from '../core/util.js';
 import { LANG, setLang, t } from '../core/i18n.js';
 import { ENV, METRICS, mName, HAZ, ORG } from '../core/catalog.js';
 import { DAYS, STORM_DAY, DOSE_LIMIT } from '../core/sim.js';
-import { S, val, actions } from '../core/state.js';
+import { S, val, actions, PRIV } from '../core/state.js';
+import { CREW_BY_ID } from '../core/crew.js';
 import { evaluate } from '../core/engine.js';
 import { selectOrgan, frame, resize } from '../holo/holo2d.js';
 import { attachECG } from './ecg.js';
@@ -53,6 +54,7 @@ function renderVitals(){
 function renderTop(){
   $('missionDay').textContent=`${t('day')} ${S.day} / ${DAYS}`;
   $('delayChip').textContent=ENV[S.env].delayTxt; $('streak').textContent=S.streak;
+  const _m=CREW_BY_ID[S.member]; document.querySelector('.mission .label').textContent=`${_m.role} · ${_m.name} · “${_m.callsign}”`;
   $('hudEnv').textContent=t('env_'+S.env).toUpperCase();
   $('hudGrav').textContent=`${t('gravity').toUpperCase()} ${ENV[S.env].g} · ${ENV[S.env].rate?ENV[S.env].rate+' mSv/d':'—'}`;
 }
@@ -116,6 +118,7 @@ function organDetail(id){
 }
 
 function sendPacket(){
+  if(!PRIV[S.member].earth){ toast(t('priv_blocked'),'warn'); return; }
   const mins=ENV[S.env].delayMin; packetTotal=Math.max(1,Math.round(mins*60)); packetLeft=packetTotal;
   clearInterval(packetTimer);
   toast(`${t('queued')} · ${ENV[S.env].delayTxt}`,'');
@@ -146,6 +149,7 @@ function renderTimeline(){ const pct=(S.day-1)/(DAYS-1)*100; $('knob').style.lef
 function setDay(d,fromPlay){
   S.day=clamp(d,1,DAYS); S.EVAL=evaluate(S.day);
   renderTop(); renderVitals(); renderRight(); renderTimeline();
+  if(actions.renderCrew) actions.renderCrew();
   if(S.day===STORM_DAY && S.stormShownFor!==STORM_DAY){ S.stormShownFor=STORM_DAY; if(fromPlay) stopPlay(); openStorm(); }
 }
 $('day').addEventListener('input',e=>setDay(+e.target.value,false));
@@ -208,6 +212,7 @@ function applyLang(){
   document.querySelectorAll('[data-i18n-html]').forEach(el=>el.innerHTML=t(el.dataset.i18nHtml));
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
   renderHazards(); renderTimelineMarks(); if(S.EVAL){ S.EVAL=evaluate(S.day); renderTop(); renderVitals(); renderRight(); }
+  if(actions.renderCrew) actions.renderCrew();
 }
 document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{ setLang(b.dataset.lang); document.querySelectorAll('[data-lang]').forEach(x=>x.setAttribute('aria-pressed',x===b)); applyLang(); });
 
@@ -223,5 +228,5 @@ function boot(){
 }
 
 /* init */
-actions.renderRight=renderRight; actions.renderHazards=renderHazards;
+actions.renderRight=renderRight; actions.renderHazards=renderHazards; actions.refresh=()=>setDay(S.day); actions.toast=toast; actions.sendPacket=()=>{ const b=$('sendPacket'); if(b) b.click(); };
 applyLang(); buildVitals(); resize(); setDay(S.day); boot(); requestAnimationFrame(frame);

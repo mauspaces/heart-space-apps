@@ -82,3 +82,25 @@ export const STR = {
 export let LANG = 'en';
 export const setLang = l => { LANG = STR[l] ? l : 'en'; };
 export const t = k => (STR[LANG][k] ?? STR.en[k] ?? k);
+
+/* Crew view, contagion and privacy strings. */
+Object.assign(STR.en,{
+  crew_view:"Crew", crew_title:"Crew status", crew_sub:"Crew Medical Officer dashboard · tap a crew member for their full view",
+  crew_open:"Open individual view", readiness_short:"Readiness", top_alert:"Top alert", no_top_alert:"No active alerts",
+  contagion_title:"Contagion alert", contagion_body:"{n} has a fever with an infectious pattern. Suggest monitoring the rest of the crew: temperature every 8 h, masks in common areas, shared spaces cleaned.",
+  pat_cont:"Contagion risk in the crew", pat_cont_d:"{n}: fever with an infectious pattern in the crew.", pat_cont_a:"Wear a mask in common areas and measure your temperature every 8 h.",
+  priv_title:"Privacy", priv_crew:"Share with crew", priv_earth:"Share with Earth", priv_on:"Shared", priv_off:"Private",
+  priv_private:"Private. This astronaut chose not to share details with the crew.", priv_blocked:"Sharing with Earth is off for this astronaut. Turn it on to send the packet.",
+  priv_note:"The astronaut controls their own data.", ms_status:"Status", role_CDR:"Commander", role_PLT:"Pilot", role_MS1:"Mission Specialist 1 · Crew Medical Officer", role_MS2:"Mission Specialist 2",
+  demo_start:"Demo mode"
+});
+Object.assign(STR.es,{
+  crew_view:"Tripulación", crew_title:"Estado de la tripulación", crew_sub:"Panel del Oficial Médico · toca a un tripulante para ver su vista completa",
+  crew_open:"Abrir vista individual", readiness_short:"Preparación", top_alert:"Alerta principal", no_top_alert:"Sin alertas activas",
+  contagion_title:"Alerta de contagio", contagion_body:"{n} tiene fiebre con patrón infeccioso. Sugerimos vigilar al resto de la tripulación: temperatura cada 8 h, mascarilla en áreas comunes y espacios compartidos limpios.",
+  pat_cont:"Riesgo de contagio en la tripulación", pat_cont_d:"{n}: fiebre con patrón infeccioso en la tripulación.", pat_cont_a:"Usa mascarilla en áreas comunes y mide tu temperatura cada 8 h.",
+  priv_title:"Privacidad", priv_crew:"Compartir con la tripulación", priv_earth:"Compartir con la Tierra", priv_on:"Compartido", priv_off:"Privado",
+  priv_private:"Privado. Este astronauta decidió no compartir detalles con la tripulación.", priv_blocked:"Compartir con la Tierra está desactivado para este astronauta. Actívalo para enviar el paquete.",
+  priv_note:"El astronauta controla sus propios datos.", ms_status:"Estado", role_CDR:"Comandante", role_PLT:"Piloto", role_MS1:"Especialista de misión 1 · Oficial Médica", role_MS2:"Especialista de misión 2",
+  demo_start:"Modo demo"
+});

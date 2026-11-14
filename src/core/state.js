@@ -5,6 +5,9 @@ import { CREW, CREW_BY_ID } from './crew.js';
 /* Late-bound UI callbacks so renderers do not import each other. */
 export const actions = {};
 
+/* Per-astronaut privacy: the astronaut decides what is shared with the crew and with Earth. */
+export const PRIV = Object.fromEntries(CREW.map(m=>[m.id,{crew:true,earth:true}]));
+
 const OVR = Object.fromEntries(CREW.map(m=>[m.id,{}]));
 export const S = { day:142, member:'cdr', env:'transit', sheltered:false, stormShownFor:-1, overrides:OVR.cdr, streak:11, selected:null, hazard:null };
 S.EVAL = null;

@@ -26,7 +26,7 @@ function generate(m){
       sleep: r1(clamp(7.1+o('sleep')-0.003*d-q3*qs-inf*1.7+gn()*0.3,3,10)),
       glucose: Math.round(87+o('glucose')+exDrop*13+q3*3+inf*6+gn()*2.5),
       mood: r1(clamp(4.2+o('mood')-q3*qm-inf*1.6+gn()*0.25,1,5)),
-      water: r1(clamp(2.55+o('water')-inf*0.5-dry*0.8+gn()*0.12,0.5,4)),
+      water: r1(clamp(2.55+o('water')-inf*0.5-dry*1.0+gn()*0.12,0.5,4)),
       ex: Math.round(clamp(93+o('ex')-exDrop*25+gn()*4-inf*35,0,100)),
       symptoms: syms,
       dayDose: 1.8*(1+gn()*0.04),

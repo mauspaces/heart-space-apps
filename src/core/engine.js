@@ -5,7 +5,16 @@ import { LANG, t } from './i18n.js';
 import { ORG } from './catalog.js';
 import { STORM_DAY } from './sim.js';
 import { S, val as valOf, baseOf, avg as avgOf, cumDose as cumDoseOf } from './state.js';
-import { CREW_BY_ID } from './crew.js';
+import { CREW, CREW_BY_ID } from './crew.js';
+
+/* Fever-with-infectious-pattern test (same rule as the 'fever' pattern below), usable for any member. */
+export function feverNow(d,id){
+  const val=(dd,k)=>valOf(dd,k,id), avg=(dd,k,n)=>avgOf(dd,k,n,id), B=baseOf(id);
+  const hrv3=avg(d,'hrv',3), hrvS=hrv3<B.hrv.m*0.7?2:hrv3<B.hrv.m*0.85?1:0;
+  const tp=val(d,'temp');
+  return hrvS>=1 && avg(d,'sleep',3)<B.sleep.m-0.9 && tp>=B.temp.m+0.45 && tp>=38.0;
+}
+export const feverMembers=d=>CREW.filter(m=>feverNow(d,m.id));
 
 export function evaluate(d,id=S.member){
   const val=(dd,k)=>valOf(dd,k,id), avg=(dd,k,n)=>avgOf(dd,k,n,id), cumDose=dd=>cumDoseOf(dd,id), BASE=baseOf(id);
@@ -39,6 +48,8 @@ export function evaluate(d,id=S.member){
   if(ex7<80 && M.glucose.s>=1) P.push({id:'met',s:1,title:t('pat_met'),desc:t('pat_met_d'),act:t('pat_met_a'),organ:'metabolic'});
   if(M.water.s>=1) P.push({id:'hyd',s:1,title:t('pat_hyd'),desc:t('pat_hyd_d'),act:t('pat_hyd_a'),organ:'kidneys'});
   if(storm) P.push({id:'spe',s:S.sheltered?1:2,title:t('pat_spe'),desc:t('pat_spe_d'),act:t('pat_spe_a'),organ:'dosimeter'});
+  const sick=feverMembers(d).filter(m=>m.id!==id);
+  if(sick.length) P.push({id:'contagion',s:1,title:t('pat_cont'),desc:t('pat_cont_d').replace('{n}',sick.map(m=>m.name).join(', ')),act:t('pat_cont_a'),organ:'immune'});
   if(S.env==='mars') P.push({id:'grav',s:1,title:t('pat_grav'),desc:t('pat_grav_d'),act:t('pat_grav_a'),organ:'ear'});
   P.sort((a,b)=>b.s-a.s);
 
