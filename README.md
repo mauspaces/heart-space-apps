@@ -81,7 +81,7 @@ Sources are listed in [`docs/brain/Cerebro-SpaceApps-2026/Fuentes.md`](docs/brai
 
 ## Use of AI
 
-The application code was written with AI assistance: **Claude Code** (Anthropic; Claude Fable 5.2 and Claude Sonnet 5.5) ported the single-file prototype to modules and implemented the crew model, Crew view, contagion and privacy logic, demo mode, mini-map, offline support and visual pass, under the team's direction and review. Research notes and the product concept were prepared by the team with AI assistance and checked against the NASA and CSA pages cited above. The crew avatars are initials badges drawn in code (no AI-generated images). Any AI-generated logo or banner artwork used in the team page or slides carries a visible "AI-generated" watermark.
+The application code was written with AI assistance: **Claude Code** (Anthropic; Claude Fable 5.2, Claude Sonnet 5.5 and Claude Opus 5.5) ported the single-file prototype to modules and implemented the crew model, Crew view, GO / NO-GO poll, contagion and privacy logic, demo mode, mini-map, offline support, the 3D body and the visual design, under the team's direction and review. Research notes and the product concept were prepared by the team with AI assistance and checked against the NASA and CSA pages cited above. **Crew portraits** are the team members' own photos edited with **Higgsfield** (AI image generation) to dress them in a plain white spacesuit; they were cropped so no logo or patch appears, and each one shows a visible "AI-generated" mark in the app. Any other AI-generated logo or banner artwork used in the team page or slides carries a visible "AI-generated" watermark.
 
 ## Roadmap
 
