@@ -11,14 +11,15 @@ const TONE = { cdr: '#E8B23A', plt: '#4EA8DE', ms1: '#5BD6FF', ms2: '#D9653B' };
 const shape = s => `<i class="shape s${s}"></i>`;
 const pill = s => `<span class="pill s${s}">${shape(s)}${t(['st0', 'st1', 'st2'][s])}</span>`;
 const L = o => o[LANG] || o.en;
-let open = false;
+let open = false, animateUntil = 0;
+const GO = s => t(['ready', 'review', 'notfit'][s]);
 
 export const badge = (m, size = '') => `<span class="avatar ${size}" style="--tone:${TONE[m.id]}" aria-hidden="true">${m.initials}</span>`;
 
 function memberInfo(m) {
   const E = evaluate(S.day, m.id);
   const worst = Math.max(0, ...Object.values(E.O));
-  const lvl = E.score >= 75 ? 0 : E.score >= 50 ? 1 : 2;
+  const lvl = E.verdict;
   return { m, E, worst, lvl, top: E.P[0] };
 }
 
@@ -49,6 +50,7 @@ function renderView() {
     <div class="crew-head"><div><span class="label">${t('crew_view')} · ${t('day')} ${S.day} / ${DAYS}</span><h2>${t('crew_title')}</h2><p>${t('crew_sub')}</p></div>
       <button class="btn small" id="crewClose">${t('back')}</button></div>
     ${banner}
+    ${board(infos)}
     <div class="crew-grid">${infos.map(cardHtml).join('')}</div>
     <p class="crew-note">${t('priv_note')} · ${t('disclaimer')}</p>
   </div>`;
@@ -64,12 +66,28 @@ function renderView() {
   });
 }
 
+/* The crew GO / NO-GO poll: rows are astronauts, columns the nine EVA criteria. Revealed row by row on open. */
+function board(infos) {
+  const anim = performance.now() < animateUntil ? ' pb-anim' : '';
+  const cols = infos[0].E.poll;
+  return `<section class="poll-board${anim}" aria-label="${t('crew_poll')}">
+    <div class="pb-head"><span class="eyebrow">${t('poll_title')} · ${t('day')} ${S.day}</span><span class="eyebrow pb-rule">${t('poll_rule')}</span></div>
+    <div class="pb-wrap"><table class="pb">
+      <thead><tr><th scope="col"><span class="vh">${t('crew_view')}</span></th>${cols.map(p => `<th scope="col">${p.lab}</th>`).join('')}<th scope="col" class="pb-vh">EVA</th></tr></thead>
+      <tbody>${infos.map((x, i) => {
+        const priv = !PRIV[x.m.id].crew, d = i * 420;
+        const cells = x.E.poll.map((p, j) => priv ? `<td style="animation-delay:${d + j * 35}ms">—</td>`
+          : `<td class="c${p.s}" style="animation-delay:${d + j * 35}ms">${shape(p.s)}<span class="vh">${GO(p.s)}</span></td>`).join('');
+        return `<tr><th scope="row">${x.m.role}<span>${x.m.callsign}</span></th>${cells}<td class="pb-v c${x.lvl}" style="animation-delay:${d + 380}ms">${GO(x.lvl)}</td></tr>`;
+      }).join('')}</tbody></table></div></section>`;
+}
+
 function cardHtml({ m, E, worst, lvl, top }) {
   const priv = PRIV[m.id];
   const c = stColor(worst);
   const body = priv.crew
     ? `<div class="crew-status">${pill(worst)}</div>
-      <div class="crew-score"><b class="mono" style="color:${stColor(lvl)}">${E.score}</b><span>/100 · ${t('readiness_short')} · <span style="color:${stColor(lvl)}">${[t('ready'), t('review'), t('notfit')][lvl]}</span></span></div>
+      <div class="crew-go"><b class="c${lvl}">${GO(lvl)}</b><span>EVA · ${E.poll.filter(p => p.s).length} / ${E.poll.length}</span></div>
       <div class="crew-alert"><span class="label">${t('top_alert')}</span>${top
         ? `<p style="color:${stColor(top.s)}">${shape(top.s)} <span>${top.title}</span></p>`
         : `<p class="ok">${shape(0)} <span>${t('no_top_alert')}</span></p>`}</div>`
@@ -89,7 +107,7 @@ function toggleCrewView(on) {
   open = on;
   renderSwitch();
   renderView();
-  if (on) { const b = $('crewClose'); if (b) b.focus(); }
+  if (on) { animateUntil = performance.now() + 2600; renderView(); const b = $('crewClose'); if (b) b.focus(); }
 }
 function openMember(id) {
   open = false;

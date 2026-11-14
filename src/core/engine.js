@@ -2,7 +2,7 @@
    Illustrative thresholds — not for clinical use. */
 import { clamp } from './util.js';
 import { LANG, t } from './i18n.js';
-import { ORG } from './catalog.js';
+import { ORG, mName } from './catalog.js';
 import { STORM_DAY } from './sim.js';
 import { S, val as valOf, baseOf, avg as avgOf, cumDose as cumDoseOf } from './state.js';
 import { CREW, CREW_BY_ID } from './crew.js';
@@ -51,6 +51,20 @@ export function evaluate(d,id=S.member){
   const sick=feverMembers(d).filter(m=>m.id!==id);
   if(sick.length) P.push({id:'contagion',s:1,title:t('pat_cont'),desc:t('pat_cont_d').replace('{n}',sick.map(m=>m.name).join(', ')),act:t('pat_cont_a'),organ:'immune'});
   if(S.env==='mars') P.push({id:'grav',s:1,title:t('pat_grav'),desc:t('pat_grav_d'),act:t('pat_grav_a'),organ:'ear'});
+  // evidence: every alert shows the numbers behind it, against the astronaut's own baseline
+  const sg=x=>(x>0?'+':x<0?'−':'')+String(Math.abs(x));
+  const pc=(v,b)=>sg(Math.round((v/b-1)*100))+'%';
+  const df=(v,b,d,u)=>sg(+(v-b).toFixed(d))+' '+u;
+  const vb=' '+t('vs_base');
+  const EV={
+    inf:[`${mName('hrv')} ${hrv3.toFixed(0)} ms · ${pc(hrv3,BASE.hrv.m)}${vb}`,`${mName('sleep')} ${sleep3.toFixed(1)} h · ${df(sleep3,BASE.sleep.m,1,'h')}${vb}`,`${mName('temp')} ${tp.toFixed(1)} °C · ${df(tp,BASE.temp.m,1,'°C')}${vb}`],
+    ops:[`${mName('sleep')} ${sleep3.toFixed(1)} h · ${t('ev_3n')}`,`${mName('mood')} ${md5.toFixed(1)} / 5 · ${t('ev_5d')}`],
+    met:[`${mName('exercise')} ${Math.round(ex7)}%`,`${mName('glucose')} ${gl} mg/dL · ${df(gl,BASE.glucose.m,0,'mg/dL')}${vb}`],
+    hyd:[`${mName('water')} ${w2[0].toFixed(1)} L · ${w2[1].toFixed(1)} L · ${t('ev_2d')}`],
+    spe:[t('ev_spe')], grav:[t('ev_grav')],
+  };
+  EV.fever=EV.inf;
+  P.forEach(p=>{ p.ev=p.ev||EV[p.id]||[]; p.esc=p.s===2?'earth':'crew'; });
   P.sort((a,b)=>b.s-a.s);
 
   const O={};
@@ -63,5 +77,9 @@ export function evaluate(d,id=S.member){
   keys.forEach(([k,lab])=>{ const s=M[k].s; if(s){ score-= s===2?30:12; factors.push({k,lab:t(lab),s}); } });
   if(storm && !S.sheltered){score-=40;}
   score=clamp(score,0,100);
-  return {M,P,O,score,factors,dose};
+  // EVA GO / NO-GO poll: each criterion reports GO (0), HOLD (1, needs the Crew Medical Officer) or NO-GO (2)
+  const POLL=[['hr','f_hr'],['hrv','f_hrv'],['temp','f_temp'],['spo2','f_spo2'],['sleep','f_sleep'],['mood','f_mood'],['vestibular','f_bal'],['symptoms','f_sym'],['dose','f_rad']];
+  const poll=POLL.map(([k,lab])=>({k,lab:t(lab),s:M[k].s}));
+  const verdict=Math.max(0,...poll.map(p=>p.s));
+  return {M,P,O,score,factors,dose,poll,verdict};
 }

@@ -21,7 +21,6 @@ function spark(key,d,s,w=120,h=26){
   const last=pts[pts.length-1];
   return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${dpath}" fill="none" stroke="${s?stColor(s):'#0c0c0c'}" stroke-opacity="${s?1:.55}" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="2" fill="${s?stColor(s):'#0c0c0c'}"/></svg>`;
 }
-let lastScore=null;
 function tween(el,to,dec){
   const from=parseFloat(el.dataset.v); el.dataset.v=to;
   if(isNaN(from)||REDUCED||from===to){ el.firstChild.nodeValue=to.toFixed(dec); return; }
@@ -34,7 +33,7 @@ function buildVitals(){
   $('vitals').innerHTML = VITALS.map(([k,o,wide])=>`<button class="vrow" id="v-${k}" data-organ="${o}">
     <span class="vrow-spark">${wide?'<canvas id="ecg" aria-hidden="true"></canvas>':`<span id="vsp-${k}"></span>`}</span>
     <span class="vrow-main"><span class="vrow-label"><span id="vs-${k}"></span><span id="vn-${k}">${mName(k)}</span></span>
-    <span class="vrow-val"><span id="vv-${k}" data-v="">–</span><small>${METRICS[k].unit}</small></span></span></button>`).join('');
+    <span class="vrow-val"><span id="vv-${k}" data-v="">–</span><small>${METRICS[k].unit}</small></span><span class="vrow-src" id="vsrc-${k}"></span></span></button>`).join('');
   $('vitals').querySelectorAll('.vrow').forEach(b=>b.onclick=()=>selectOrgan(b.dataset.organ));
   attachECG($('ecg'));
 }
@@ -43,7 +42,7 @@ function renderVitals(){
   $('vitalsDay').textContent=`${t('day')} ${d}`;
   VITALS.forEach(([k])=>{
     const m=M[k]; const card=$('v-'+k); card.className='vrow'+(m.s?' st-'+m.s:'');
-    $('vn-'+k).textContent=mName(k);
+    $('vn-'+k).textContent=mName(k); $('vsrc-'+k).textContent=t('src_'+k);
     const stw=t(['st0','st1','st2'][m.s]);
     $('vs-'+k).innerHTML=`<span class="st c${m.s}" style="display:inline-flex;align-items:center;gap:6px">${shape(m.s)}${m.s?stw:`<span class="vh">${stw}</span>`}</span>`;
     const el=$('vv-'+k);
@@ -68,7 +67,7 @@ function renderRight(){
   const lvl=E.score>=75?0:E.score>=50?1:2; const lab=[t('ready'),t('review'),t('notfit')][lvl];
   const rate=ENV[S.env].rate; const left=DOSE_LIMIT-E.dose; const proj=rate? Math.round(left/rate):null;
   const m=CREW_BY_ID[S.member], pct=Math.round(E.dose/DOSE_LIMIT*100);
-  const from = lastScore===null? E.score : lastScore;
+  const V=E.verdict, goWord=t(['ready','review','notfit'][V]), notGo=E.poll.filter(p=>p.s).length;
   R.innerHTML=`<section class="dossier">
   <header class="who fade-in">
     <span class="eyebrow">${t('role_'+m.role)} · “${m.callsign}”</span>
@@ -76,14 +75,15 @@ function renderRight(){
     <p class="who-meta">${t('day')} ${S.day} / ${DAYS} · ${t('env_'+S.env)}</p>
   </header>
   <div class="verdict fade-in">
-    <span class="eyebrow">${t('readiness')} · ${t('readiness_for')}</span>
-    <div class="verdict-row"><b class="score" id="scoreNum" data-v="${from}">${from}</b><span class="score-of">/ 100</span></div>
-    <div class="verdict-word c${lvl}">${shape(lvl)}<span>${lab}</span></div>
-    <ul class="factors">${E.factors.length? E.factors.map(f=>`<li class="c${f.s}">${shape(f.s)}<span>${f.lab}</span></li>`).join('') : `<li class="c0">${shape(0)}<span>${t('no_alerts').split('.')[0]}</span></li>`}</ul>
+    <span class="eyebrow">${t('poll_title')}</span>
+    <div class="go-word c${V}${goWord.length>6?' long':''}">${goWord}</div>
+    <p class="go-sub">${notGo? t('poll_of').replace('{n}',notGo).replace('{m}',E.poll.length) : t('poll_all').replace('{m}',E.poll.length)}</p>
+    <ol class="poll">${E.poll.map((p,i)=>`<li class="c${p.s}" style="animation-delay:${i*40}ms">${shape(p.s)}<span class="poll-lab">${p.lab}</span><span class="poll-v">${t(['ready','review','notfit'][p.s])}</span></li>`).join('')}</ol>
+    <p class="poll-rule">${t('poll_rule')}</p>
   </div>
   <div class="block fade-in">
     <div class="block-head"><span class="eyebrow">${t('alerts')}</span><span class="eyebrow mono">${String(E.P.length).padStart(2,'0')}</span></div>
-    ${E.P.length? E.P.map(p=>`<div class="alert s${p.s}" role="button" tabindex="0" data-organ="${p.organ}"><span class="eyebrow c${p.s}">${shape(p.s)}${t(['st0','st1','st2'][p.s])} · ${ORG[p.organ][LANG].name}</span><b>${p.title}</b><p>${p.desc}</p><p class="act">→ ${p.act}</p></div>`).join('') : `<div class="empty"><span class="c0">${shape(0)}</span>${t('no_alerts')}</div>`}
+    ${E.P.length? E.P.map(p=>`<div class="alert s${p.s}" role="button" tabindex="0" data-organ="${p.organ}"><span class="eyebrow c${p.s}">${shape(p.s)}${t(['st0','st1','st2'][p.s])} · ${ORG[p.organ][LANG].name}</span><b>${p.title}</b>${p.ev&&p.ev.length?`<ul class="ev">${p.ev.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}<p>${p.desc}</p><p class="act">→ ${p.act}</p><p class="esc">${t('escalate_to')} <span>${p.esc==='earth'?t('esc_earth'):t('esc_crew')}</span></p></div>`).join('') : `<div class="empty"><span class="c0">${shape(0)}</span>${t('no_alerts')}</div>`}
   </div>
   <div class="block fade-in">
     <div class="block-head"><span class="eyebrow">${t('radiation')}</span>${pill(E.M.dose.s)}</div>
@@ -92,12 +92,14 @@ function renderRight(){
     <dl class="kv-list">
       <div><dt>${t('rate_now')}</dt><dd>${rate?rate+' mSv/'+(LANG==='es'?'día':'day'):'—'}</dd></div>
       <div><dt>${t('projection')}</dt><dd>${proj!==null? proj+' '+t('days') : '—'}</dd></div>
-      <div><dt>${t('oneway')}</dt><dd>${ENV[S.env].delayTxt}</dd></div>
     </dl>
-    <button class="btn block" id="sendPacket">${t('send')}</button>
+  </div>
+  <div class="block fade-in">
+    <div class="block-head"><span class="eyebrow">${t('lt_title')}</span><span class="eyebrow">${ENV[S.env].delayTxt}</span></div>
     <div class="packet" id="packet"></div>
+    <button class="btn block" id="sendPacket">${t('send')}</button>
+    <p class="poll-rule">${t('lt_note')}</p>
   </div></section>`;
-  tween($('scoreNum'), E.score, 0); lastScore=E.score;
   requestAnimationFrame(()=>{ const b=$('doseBar'); if(b) b.style.width=Math.min(100,pct)+'%'; });
   R.querySelectorAll('.alert').forEach(a=>{ a.onclick=()=>selectOrgan(a.dataset.organ); a.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectOrgan(a.dataset.organ); } }; });
   $('sendPacket').onclick=sendPacket; renderPacket();
@@ -123,17 +125,36 @@ function organDetail(id){
 
 function sendPacket(){
   if(!PRIV[S.member].earth){ toast(t('priv_blocked'),'warn'); return; }
-  const mins=ENV[S.env].delayMin; packetTotal=Math.max(1,Math.round(mins*60)); packetLeft=packetTotal;
+  const mins=ENV[S.env].delayMin; packetTotal=Math.max(1,Math.round(mins*60)); packetLeft=2*packetTotal;
   clearInterval(packetTimer);
   toast(`${t('queued')} · ${ENV[S.env].delayTxt}`,'');
   const speed = mins>=1 ? 60 : 1; // 1 real second = 1 simulated minute
-  packetTimer=setInterval(()=>{ packetLeft-=speed; if(packetLeft<=0){ packetLeft=0; clearInterval(packetTimer); toast(`${t('delivered')} ${ENV[S.env].delayTxt}`,'ok'); } renderPacket(); },1000);
+  let half=false;
+  packetTimer=setInterval(()=>{
+    packetLeft=Math.max(0,packetLeft-speed);
+    if(!half && packetLeft<=packetTotal){ half=true; toast(`${t('delivered')} ${ENV[S.env].delayTxt}`,'ok'); }
+    if(packetLeft<=0) clearInterval(packetTimer);
+    renderPacket();
+  },1000);
   renderPacket();
 }
+/* Light-time diagram: the packet travels to Earth, the reply travels back. */
 function renderPacket(){
-  const el=$('packet'); if(!el) return; if(!packetTotal){ el.innerHTML=''; return; }
-  const m=Math.floor(packetLeft/60), s=packetLeft%60;
-  el.innerHTML = packetLeft>0 ? `<div>${t('arriving')} <b class="mono" style="color:var(--ink);font-weight:500">${m}:${String(s).padStart(2,'0')}</b></div><div class="bar"><i style="width:${(1-packetLeft/packetTotal)*100}%"></i></div>` : `<div class="ok">✓ ${t('delivered')} ${ENV[S.env].delayTxt}</div>`;
+  const el=$('packet'); if(!el) return;
+  const env=ENV[S.env], one=Math.max(1,Math.round(env.delayMin*60)), long=env.delayMin>=1;
+  const ft=x=>{x=Math.max(0,Math.round(x)); return Math.floor(x/60)+':'+String(x%60).padStart(2,'0');};
+  if(!el.querySelector('.lt')){
+    el.innerHTML=`<div class="lt"><div class="lt-ends"><span>${t('lt_ship')}</span><span>${t('lt_earth')}</span></div>
+      <div class="lt-line"><i class="lt-dot"></i></div></div>
+      <dl class="kv-list"><div><dt>${t('lt_recv')}</dt><dd class="lt-recv"></dd></div><div><dt>${t('lt_reply')}</dt><dd class="lt-reply"></dd></div></dl>`;
+  }
+  const live=packetTotal>0, el2=live? 2*packetTotal-packetLeft : 0;
+  const x= !live? 0 : el2<=packetTotal? el2/packetTotal : Math.max(0,1-(el2-packetTotal)/packetTotal);
+  el.querySelector('.lt-line').classList.toggle('live', live && packetLeft>0);
+  el.querySelector('.lt-dot').style.left=(x*100).toFixed(2)+'%';
+  const cell=(left,tot)=> !live? (long? '+'+ft(tot) : (tot>one? '2 × ':'')+env.delayTxt) : left>0? `${t('lt_in')} ${long?ft(left):Math.ceil(left)+' s'}` : `✓ ${t('lt_done')}`;
+  el.querySelector('.lt-recv').textContent=cell(packetTotal-el2, one);
+  el.querySelector('.lt-reply').textContent=cell(2*packetTotal-el2, 2*one);
 }
 
 function renderHazards(){

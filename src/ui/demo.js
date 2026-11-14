@@ -25,8 +25,8 @@ const crewView = (on = true) => actions.showCrewView(on);
 
 const STEPS = [
   { ms: 14000,
-    es: 'Día 130 · Cuatro astronautas, cuatro líneas base personales. El Oficial Médico ve a toda la tripulación de un vistazo: todos en verde.',
-    en: 'Day 130 · Four astronauts, four personal baselines. The Crew Medical Officer sees the whole crew at a glance: everyone is normal.',
+    es: 'Día 130 · Cuatro astronautas, cuatro líneas base personales. El Oficial Médico corre la votación GO / NO GO de la EVA: los cuatro en GO.',
+    en: 'Day 130 · Four astronauts, four personal baselines. The Crew Medical Officer runs the EVA go / no-go poll: all four are GO.',
     run() { reset('transit', 'cdr', 130); crewView(true); } },
   { ms: 12000,
     es: 'Vista individual del comandante: figura humana, signos vitales y su tendencia contra su propia línea base. Sin alertas.',
@@ -37,8 +37,8 @@ const STEPS = [
     en: 'Day 139 · HRV is down, sleep is shorter, temperature is creeping up. The engine flags a possible infection BEFORE any fever.',
     run() { reset('transit', 'cdr', 139); crewView(false); later(() => actions.selectOrgan('immune'), 2500); } },
   { ms: 17000,
-    es: 'Día 142 · Fiebre. La preparación para una tarea crítica cae a "No apto" y la tripulación recibe una alerta de contagio.',
-    en: 'Day 142 · Fever. Readiness for a critical task drops to "Not fit" and the rest of the crew gets a contagion alert.',
+    es: 'Día 142 · Fiebre. La preparación para una tarea crítica cae a "NO GO" y la tripulación recibe una alerta de contagio.',
+    en: 'Day 142 · Fever. Readiness for a critical task drops to "NO-GO" and the rest of the crew gets a contagion alert.',
     run() { reset('transit', 'cdr', 142); crewView(false); later(() => crewView(true), 5500); } },
   { ms: 20000,
     es: 'Día 151 · Tormenta solar. Alerta roja, cuenta regresiva y lista de refugio para toda la tripulación. Refugiarse baja la dosis del evento de ~42 a ~12 mSv.',

@@ -318,3 +318,29 @@ textarea:focus{outline:none;border-bottom-width:2px}
 }
 
 @media (max-width:1100px){html,body{overflow-x:hidden}.evt{font-size:9px}}
+
+/* ---------- GO / NO-GO poll, evidence, escalation, light-time, provenance ---------- */
+.go-word{margin-top:12px;font:400 104px/.86 var(--f-display);letter-spacing:-.04em;text-transform:uppercase;white-space:nowrap}
+.go-word.long{font-size:64px;line-height:.95}
+.go-sub{margin:14px 0 0;font:400 14px var(--f-ui);color:var(--ink)}
+.poll{list-style:none;margin:16px 0 0;padding:0;display:grid;grid-template-columns:1fr 1fr;column-gap:22px;border-top:1px solid var(--rule)}
+.poll li{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--rule-soft);font:400 13px var(--f-ui);animation:fadeUp .4s var(--ease) both}
+.poll-lab{flex:1;color:var(--ink)}
+.poll-v{font:400 11px var(--f-display);letter-spacing:.06em;text-transform:uppercase}
+.poll-rule{margin:12px 0 0;font:400 12px/1.5 var(--f-ui);color:var(--gray)}
+.ev{list-style:none;margin:6px 0 10px;padding:0 0 0 12px;border-left:1px solid var(--ink)}
+.ev li{font:400 13px/1.6 var(--f-ui);color:var(--ink);font-variant-numeric:tabular-nums}
+.esc{margin:10px 0 0!important;font:400 11px/1.2 var(--f-display)!important;letter-spacing:.06em;text-transform:uppercase;color:var(--gray)!important}
+.esc span{color:var(--ink)}
+.alert.s2 .esc span{color:var(--bad)}
+.lt{margin:2px 0 4px}
+.lt-ends{display:flex;justify-content:space-between;font:400 11px var(--f-display);letter-spacing:.06em;text-transform:uppercase;color:var(--gray)}
+.lt-line{position:relative;height:1px;background:var(--ink);margin:14px 6px 16px}
+.lt-line::before,.lt-line::after{content:"";position:absolute;top:-5px;width:11px;height:11px;border-radius:50%;border:1px solid var(--ink);background:var(--white)}
+.lt-line::before{left:-6px}.lt-line::after{right:-6px;background:var(--ink)}
+.lt-dot{position:absolute;top:-4px;width:9px;height:9px;margin-left:-4.5px;border-radius:50%;background:var(--bad);opacity:0;transition:left 1s linear,opacity .3s}
+.lt-line.live .lt-dot{opacity:1}
+.lt-line.live{background:repeating-linear-gradient(90deg,var(--ink) 0 6px,transparent 6px 10px)}
+.vrow-src{display:block;margin-top:5px;font:400 11px/1.2 var(--f-ui);color:var(--gray)}
+.vrow{padding:10px 0 9px}
+.vrow-val{font-size:28px}

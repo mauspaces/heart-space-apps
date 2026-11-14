@@ -107,3 +107,33 @@ Object.assign(STR.es,{
 
 Object.assign(STR.en,{ boot_line:"On Mars, the doctor is up to 20 minutes away. Every astronaut becomes their own first responder." });
 Object.assign(STR.es,{ boot_line:"En Marte, el médico está hasta a 20 minutos. Cada astronauta se vuelve su propio primer respondiente." });
+
+/* GO / NO-GO poll, evidence, escalation, light-time, data provenance. */
+Object.assign(STR.en,{
+  ready:"GO", review:"HOLD", notfit:"NO-GO",
+  poll_title:"EVA go / no-go poll", poll_of:"{n} of {m} criteria not GO", poll_all:"All {m} criteria GO",
+  poll_rule:"Any NO-GO stops the EVA. HOLD needs the Crew Medical Officer.", f_rad:"Radiation",
+  vs_base:"vs baseline", ev_3n:"3-night avg", ev_5d:"5-day avg", ev_2d:"last 2 days",
+  ev_spe:"Proton flux rising · event dose ~42 mSv unsheltered, ~12 mSv in shelter", ev_grav:"0.38 g after ~6 months at 0 g · balance unsteady",
+  escalate_to:"Escalate to", esc_crew:"Crew Medical Officer", esc_earth:"Flight surgeon on Earth",
+  lt_title:"Light-time to Earth", lt_ship:"Crew · now", lt_earth:"Earth", lt_recv:"Earth receives", lt_reply:"Earliest reply",
+  lt_note:"Until the reply arrives, the crew acts on board.", lt_in:"in", lt_done:"done",
+  src_hr:"Wrist wearable · continuous", src_hrv:"Wrist wearable · on waking", src_bp:"Cuff · seated, 07:10", src_spo2:"Pulse oximeter · 07:12",
+  src_temp:"Thermometer · on waking", src_sleep:"Actigraphy · last night", src_glucose:"Glucometer · fasting", src_mood:"Daily check-in",
+  src_water:"Pouch log · today", src_exercise:"Exercise log · 7 days",
+  crew_poll:"Crew poll"
+});
+Object.assign(STR.es,{
+  ready:"GO", review:"EN ESPERA", notfit:"NO GO",
+  poll_title:"Votación GO / NO GO para EVA", poll_of:"{n} de {m} criterios no están en GO", poll_all:"Los {m} criterios en GO",
+  poll_rule:"Cualquier NO GO detiene la EVA. EN ESPERA requiere al Oficial Médico.", f_rad:"Radiación",
+  vs_base:"vs línea base", ev_3n:"promedio 3 noches", ev_5d:"promedio 5 días", ev_2d:"últimos 2 días",
+  ev_spe:"Flujo de protones en aumento · dosis del evento ~42 mSv sin refugio, ~12 mSv en refugio", ev_grav:"0.38 g tras ~6 meses en 0 g · equilibrio inestable",
+  escalate_to:"Escalar a", esc_crew:"Oficial Médico", esc_earth:"Médico de vuelo en Tierra",
+  lt_title:"Tiempo-luz a la Tierra", lt_ship:"Tripulación · ahora", lt_earth:"Tierra", lt_recv:"La Tierra recibe", lt_reply:"Respuesta más temprana",
+  lt_note:"Hasta que llegue la respuesta, la tripulación actúa a bordo.", lt_in:"en", lt_done:"listo",
+  src_hr:"Wearable de muñeca · continuo", src_hrv:"Wearable de muñeca · al despertar", src_bp:"Brazalete · sentado, 07:10", src_spo2:"Oxímetro · 07:12",
+  src_temp:"Termómetro · al despertar", src_sleep:"Actigrafía · anoche", src_glucose:"Glucómetro · en ayunas", src_mood:"Check-in diario",
+  src_water:"Registro de bolsas · hoy", src_exercise:"Registro de ejercicio · 7 días",
+  crew_poll:"Votación de la tripulación"
+});
