@@ -214,8 +214,10 @@ export function init3D() {
   /* soft bloom: only the fresnel rim, the scan line and alert organs cross the threshold */
   const composer = new EffectComposer(renderer);
   composer.addPass(new RenderPass(scene, camera));
-  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.4, 0.32); // strength, radius, threshold
-  composer.addPass(bloom); composer.addPass(new OutputPass());
+  /* phones / touch-first devices: no bloom (its blur passes are the heaviest part of the frame); the OutputPass stays so colours match */
+  const LITE = window.matchMedia('(max-width: 1100px), (pointer: coarse)').matches;
+  if (!LITE) composer.addPass(new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.4, 0.32)); // strength, radius, threshold
+  composer.addPass(new OutputPass());
 
   // floor: calibration rings and ticks
   const ringMat = op => new THREE.MeshBasicMaterial({ color: INK, transparent: true, opacity: op, side: THREE.DoubleSide, depthWrite: false });
