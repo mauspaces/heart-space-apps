@@ -11,10 +11,10 @@ import { HAZ, ORG } from '../core/catalog.js';
 import { S } from '../core/state.js';
 import { selectOrgan } from './holo2d.js';
 
-const INK = new THREE.Color('#0c0c0c');
-const NEUTRAL = new THREE.Color('#8f949b');
-const STATUS = [NEUTRAL, new THREE.Color('#B45309'), new THREE.Color('#D92D20')];
-const DIM = new THREE.Color('#c9c9c9');
+const INK = new THREE.Color('#5BD6FF');
+const NEUTRAL = new THREE.Color('#C9D6E3');
+const STATUS = [NEUTRAL, new THREE.Color('#F5B841'), new THREE.Color('#FF4D5E')];
+const DIM = new THREE.Color('#3A4452');
 const SHAPE = ['●', '▲', '◆'];
 
 const VERT = `varying vec3 vN; varying vec3 vV; varying vec3 vW;
@@ -92,7 +92,7 @@ function buildSkeleton() {
     }
   }
   const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
-  return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.13, depthWrite: false }));
+  return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({ color: INK, transparent: true, opacity: 0.22, depthWrite: false }));
 }
 function buildOrgans() {
   const root = new THREE.Group(), M = {};
@@ -134,7 +134,7 @@ export function init3D() {
   cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab';
   host.insertBefore(cv, old); old.style.display = 'none'; S.use3d = true;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.setClearColor(0xffffff, 1);
+  renderer.setClearColor(0x05070a, 1);
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(30, 1, 0.05, 40);

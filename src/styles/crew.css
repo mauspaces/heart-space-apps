@@ -1,4 +1,4 @@
-/* Crew view — four "product title cards" on the white lab canvas, separated by 1px rules. */
+/* Crew view — four title cards on the mission-control canvas, separated by 1px rules. */
 #crewSwitch{display:flex;align-items:center}
 .crew-seg{gap:22px}
 .crew-seg button{display:inline-flex;align-items:center;gap:7px}
@@ -26,7 +26,7 @@
 .crew-card small{font:400 13px var(--f-ui);color:var(--gray)}
 .crew-status{padding-top:16px;border-top:1px solid var(--rule)}
 .crew-score{display:flex;align-items:baseline;gap:10px;font:400 13px var(--f-ui);color:var(--gray)}
-.crew-score b{font:400 64px/.9 var(--f-display)!important;letter-spacing:-.03em;color:var(--ink)!important}
+.crew-score b{font:500 64px/.9 var(--f-display)!important;text-shadow:var(--glow);letter-spacing:-.03em;color:var(--ink)!important}
 .crew-alert p{display:flex;gap:8px;align-items:flex-start;margin:8px 0 0;font:500 15px/1.4 var(--f-ui);color:var(--ink)!important}
 .crew-alert p .shape{margin-top:6px}
 .crew-alert p.ok{font-weight:400;color:var(--gray)!important}
@@ -99,7 +99,7 @@
 /* framing: head and shoulders in the Crew view, a tight face crop in the dossier */
 .portrait img{object-position:50% 30%}
 .portrait.sm img{transform:scale(1.55);transform-origin:50% 30%}
-.portrait{background:#f2f2f2}
+.portrait{background:var(--wash)}
 @media (min-width:641px){.crew-card .portrait{aspect-ratio:auto;height:clamp(260px,26vw,340px)}}
 /* portraits keep the full 4:5 frame so the suit patch is never cut */
 @media (min-width:641px){.crew-card .portrait{height:clamp(260px,26vw,340px);width:auto;aspect-ratio:4/5;max-width:100%}}

@@ -20,7 +20,7 @@ function spark(key,d,s,w=120,h=26){
   const pts=xs.map((v,i)=>[(i/(Math.max(1,xs.length-1)))*w, h-3-((v-mn)/rg)*(h-6)]);
   const dpath=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
   const last=pts[pts.length-1];
-  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${dpath}" fill="none" stroke="${s?stColor(s):'#0c0c0c'}" stroke-opacity="${s?1:.55}" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="2" fill="${s?stColor(s):'#0c0c0c'}"/></svg>`;
+  return `<svg class="spark" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><path d="${dpath}" fill="none" stroke="${s?stColor(s):'#E6EDF5'}" stroke-opacity="${s?1:.55}" stroke-width="1" vector-effect="non-scaling-stroke"/><circle cx="${last[0]}" cy="${last[1]}" r="2" fill="${s?stColor(s):'#E6EDF5'}"/></svg>`;
 }
 function tween(el,to,dec){
   const from=parseFloat(el.dataset.v); el.dataset.v=to;

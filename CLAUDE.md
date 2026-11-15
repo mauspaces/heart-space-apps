@@ -57,7 +57,7 @@ Verified behaviour that must not regress (Mars transit): day 139 → "Possible e
 
 ## Decisions already taken
 
-- **Design = hybrid.** Structure from `DESIGN-spacex.md`: near-black canvas, 1px hairlines, uppercase condensed display type with positive tracking, ghost pill buttons, no drop shadows or decorative gradients in the chrome. Colour only for data, from `DESIGN.md`: `holo #5BD6FF`, `ok #3CF0A8`, `warn #F5B841`, `bad #FF4D5E`, `earth #4EA8DE`, `mars #D9653B`. Mono font for telemetry. For the display face use an OFL condensed font bundled via `@fontsource` (e.g. Barlow Condensed); do not load fonts from a CDN.
+- **Design = dark mission control** (Nov 14 redesign, replaces the white "lab dossier"). Near-black canvas `#05070A`, 1px hairlines, uppercase Barlow Condensed display type, JetBrains Mono for telemetry, Inter for body, ghost pill buttons, no drop shadows or decorative gradients in the chrome. Colour and glow (`--glow`) only for data, from `DESIGN.md`: `holo #5BD6FF`, `ok #3CF0A8`, `warn #F5B841`, `bad #FF4D5E`, `earth #4EA8DE`, `mars #D9653B`. In `app.css` the token names are inverted on purpose: `--white` is the dark canvas, `--ink` the light text. Fonts bundled via `@fontsource`, never a CDN.
 - **3D** comes last and only if budget remains (task D1).
 
 ## Status (updated)

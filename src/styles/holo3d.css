@@ -1,16 +1,16 @@
-/* Organ pins — BioDigital-style "+" callouts on the white plate. Status = shape + word, never colour alone. */
+/* Organ pins — BioDigital-style "+" callouts on the dark stage. Status = shape + word, never colour alone. */
 #pins{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:3}
 .pin{position:absolute;left:0;top:0;width:22px;height:22px;margin:-11px 0 0 -11px;will-change:transform;transition:opacity .25s;color:var(--ink)}
-.pin-dot{position:absolute;inset:0;display:block;border:1px solid var(--ink);border-radius:50%;background:var(--white);transition:transform .2s var(--ease),background .2s}
+.pin-dot{position:absolute;inset:0;display:block;border:1px solid var(--holo);border-radius:50%;background:rgba(5,7,10,.7);color:var(--holo);box-shadow:0 0 10px color-mix(in srgb,var(--holo) 50%,transparent);transition:transform .2s var(--ease),background .2s}
 .pin-dot::before,.pin-dot::after{content:"";position:absolute;left:50%;top:50%;background:currentColor;transform:translate(-50%,-50%)}
 .pin-dot::before{width:9px;height:1px}.pin-dot::after{width:1px;height:9px}
-.pin.st1 .pin-dot{border-color:var(--warn);background:var(--warn);color:var(--white);border-radius:3px;transform:scale(.92)}
-.pin.st2 .pin-dot{border-color:var(--bad);background:var(--bad);color:var(--white);border-radius:2px;transform:rotate(45deg) scale(.82)}
+.pin.st1 .pin-dot{border-color:var(--warn);background:var(--warn);color:var(--white);box-shadow:0 0 14px var(--warn);border-radius:3px;transform:scale(.92)}
+.pin.st2 .pin-dot{border-color:var(--bad);background:var(--bad);color:var(--white);box-shadow:0 0 14px var(--bad);border-radius:2px;transform:rotate(45deg) scale(.82)}
 .pin.st2 .pin-dot::before,.pin.st2 .pin-dot::after{transform:translate(-50%,-50%) rotate(-45deg)}
 .pin:hover .pin-dot,.pin.sel .pin-dot{background:var(--ink);color:var(--white);border-color:var(--ink)}
 .pin.st1:hover .pin-dot,.pin.st1.sel .pin-dot{background:var(--warn);border-color:var(--warn)}
 .pin.st2:hover .pin-dot,.pin.st2.sel .pin-dot{background:var(--bad);border-color:var(--bad)}
-.pin-lab{position:absolute;left:32px;top:50%;transform:translateY(-50%);display:none;flex-direction:column;gap:3px;white-space:nowrap;padding:8px 12px;background:var(--white);border:1px solid var(--ink);text-align:left;pointer-events:none}
+.pin-lab{position:absolute;left:32px;top:50%;transform:translateY(-50%);display:none;flex-direction:column;gap:3px;white-space:nowrap;padding:8px 12px;background:rgba(5,7,10,.88);border:1px solid var(--rule);border-left:2px solid var(--holo);text-align:left;pointer-events:none}
 .pin-lab b{font:500 13px/1.2 var(--f-ui);letter-spacing:-.01em;color:var(--ink)}
 .pin-lab span{font:400 11px/1 var(--f-display);letter-spacing:.06em;text-transform:uppercase}
 .pin:hover,.pin:focus-visible,.pin.sel{z-index:5}

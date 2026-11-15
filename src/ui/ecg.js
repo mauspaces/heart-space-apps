@@ -14,7 +14,7 @@ export function drawECG(ts){
   const hr=S.EVAL?S.EVAL.M.hr.v:62; const px=dt*0.11;
   for(let i=0;i<px;i++){ ecgPhase=(ecgPhase+(hr/60)/(0.11*1000))%1; ecgBuf[Math.floor(ecgX)%ecgBuf.length]=ecgWave(ecgPhase); ecgX=(ecgX+1)%ecgBuf.length; for(let j=1;j<10;j++) ecgBuf[(Math.floor(ecgX)+j)%ecgBuf.length]=null; }
   ecgCtx.clearRect(0,0,w,h);
-  const _s=(S.EVAL?S.EVAL.M.hr.s:0), c=_s?stColor(_s):'#0c0c0c';
+  const _s=(S.EVAL?S.EVAL.M.hr.s:0), c=_s?stColor(_s):'#E6EDF5';
   ecgCtx.strokeStyle=c; ecgCtx.lineWidth=1.2; ecgCtx.shadowColor=c; ecgCtx.shadowBlur=0; ecgCtx.beginPath(); let pen=false;
   for(let x=0;x<ecgBuf.length;x++){ const v=ecgBuf[x]; if(v===null){pen=false;continue;} const y=h*0.68-v*h*0.55; if(!pen){ecgCtx.moveTo(x,y);pen=true;} else ecgCtx.lineTo(x,y); }
   ecgCtx.stroke(); ecgCtx.shadowBlur=0;
