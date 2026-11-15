@@ -1,36 +1,37 @@
-# H.E.A.R.T — Health Evaluation & Astronaut Readiness Tool
+# H.E.A.R.T
 
-> **On Mars, the doctor is up to 20 minutes away. H.E.A.R.T turns every astronaut into their own first responder.**
+**Health Evaluation & Astronaut Readiness Tool**
+Our entry for the NASA Space Apps Challenge 2026, challenge *Create Health Monitoring Software for Astronauts on Space Missions*.
 
-Entry for the **NASA Space Apps Challenge 2026** — *Create Health Monitoring Software for Astronauts on Space Missions*.
+![Crew view: four crew members with EVA go / no-go, top alert and privacy switches](docs/screenshots/crew-view.webp)
 
-> **Prototype · simulated data · illustrative thresholds · not for clinical use.** The mission crew is portrayed by the four H.E.A.R.T team members. No real astronaut, photo or likeness is used, and every health value shown is simulated.
+*Prototype · simulated data · illustrative thresholds · not for clinical use. The crew is played by the four of us. No real astronaut's name, photo or likeness appears, and every health value is simulated.*
 
-## What it is
+## The problem
 
-A personal health console that runs entirely on board (offline-first) and helps an astronaut assess their own health, understand why, and decide what to do and when to involve the crew or flight surgeons on Earth.
+A radio message between Mars and Earth takes up to about 20 minutes one way, so a question and its answer can take far longer. On a Mars mission nobody on the ground can help in real time. The crew has to understand its own health on board and decide what to do.
 
-- **Personal baselines, not population averages.** Every astronaut is compared with their own days 1–14.
-- **Combined-pattern alerts.** NASA notes that spaceflight hazards feed each other, so the engine looks at patterns (e.g. lower HRV + shorter sleep + rising temperature → possible early infection, *before* fever), not isolated numbers.
-- **Interactive 3D body hologram.** Tap an organ or its "+" pin to see what it does, today vs. baseline, a 30-day trend, what to do now, when to escalate and how to measure it. The five NASA hazards filter which organs light up.
-- **Five physiological systems as a traffic light** (cardiovascular & fluids · neuro-ocular/SANS & balance · metabolic & musculoskeletal · thermoregulation, immunity & environment · neurobehavioural & circadian), each tied to the NASA studies behind it.
-- **Deterministic, auditable protocol.** Every deviation runs the same 3 fixed steps (verify the measurement, apply the countermeasure, re-evaluate or package telemetry for Earth), with countermeasures such as thigh cuffs, electrolytes, B-complex, guided eye photo and 4-hourly temperature. No generative AI makes medical decisions.
-- **Scheduled checks, not 24/7 monitoring.** Daily checks at rest and after exercise. **Intensive monitoring** (every 4 h) switches on only during a contingency: a system in review or alert, a solar storm, or a gravity transition.
-- **On-board self-tests**: Amsler grid (vision / SANS) and a reaction-time micro-test (fatigue). Their thresholds are illustrative.
-- **Trend history** for every indicator, plotted against the astronaut's own baseline band.
-- **Radiation as a discrete trigger** in the top bar (Nominal / SPE alert).
-- **Readiness for a critical task** (EVA readiness score: Ready / Review / Not fit).
-- **Crew view** for the Crew Medical Officer: an EVA go / no-go poll board for the four crew members, portraits, top alert, contagion alert, and a per-astronaut privacy switch (share with crew / share with Earth).
-- **Environments:** ISS (≈0.5 s delay, 0.5 mSv/day) · Mars transit (≤20 min, 1.8 mSv/day) · Mars surface (≤20 min, 0.67 mSv/day, 0.38 g) · Lunar base (≈1.3 s, 0.17 g).
-- **Send a medical packet to Earth** with the real delay of the selected environment.
-- **Solar particle event** overlay with countdown and shelter checklist (sheltering reduces the event dose from ~42 to ~12 mSv).
-- **Cumulative radiation** against the 600 mSv career limit, with a projection.
-- **Daily check-in** (mood, sleep, water, symptoms, crew relations, journal) with a streak. Gamification rewards *completing* measurements, never "good" values, so nobody has a reason to hide symptoms.
-- **Mission timeline** scrubber (day 1–180) with event markers and play mode; **Earth–Moon–Mars mini-map**.
-- **Demo mode**: auto-plays the 2-minute pitch with captions (pause / next / previous).
-- English by default, Spanish via the ES/EN toggle. Status is never colour-only (● normal, ▲ review, ◆ alert, always with text). Keyboard accessible; honours `prefers-reduced-motion`.
+H.E.A.R.T is a small console for that situation. It runs offline in the browser, reads (simulated) daily measurements, and tells an astronaut what changed compared with their own normal, why it matters, and what to do next.
 
-## Run it
+## What it does
+
+- **Compares you with yourself.** Each person's baseline is their own days 1–14, not a population average.
+- **Looks at patterns, not single numbers.** NASA describes spaceflight hazards as feeding each other, so the engine combines indicators. Lower HRV, shorter sleep and a rising temperature together raise a possible early infection, before fever shows up.
+- **Body hologram.** A 3D body whose organs change colour with their status. Tap an organ to see what it does, today against baseline, a 30-day trend, what to do now and when to call Earth.
+- **Readiness for a critical task.** An EVA score (Ready / Review / Not fit) per person.
+- **Crew view** for the Crew Medical Officer: a go / no-go board, the top alert of each person, a contagion alert when someone has fever, and per-person switches for sharing data with the crew or with Earth.
+- **Radiation.** Cumulative dose against the 600 mSv career limit, and a solar-storm overlay with a countdown and a four-step shelter checklist.
+- **Medical packet to Earth** that shows the communication delay of the selected environment (ISS, Mars transit, Mars surface, Lunar base).
+- **Daily check-in, on-board self-tests** (Amsler grid, reaction time), a mission timeline from day 1 to 180, and an Earth–Moon–Mars mini-map.
+- **Demo mode** that plays our two-minute pitch inside the real app.
+
+Alerts are deterministic and rule-based, so every one can be traced to the numbers behind it. No generative AI makes medical decisions. Status is never shown by colour alone (● normal, ▲ review, ◆ alert, always with text).
+
+![Heart and circulation detail with vital signs and mission timeline](docs/screenshots/organ-detail.webp)
+
+![Brain, sleep and mood during Mars transit](docs/screenshots/brain-mars-transit.webp)
+
+## Try it
 
 Requires Node.js 18+.
 
@@ -38,64 +39,60 @@ Requires Node.js 18+.
 npm install
 npm run dev        # http://localhost:5173
 npm run build      # static site in dist/
-npm run preview    # serve the production build (http://localhost:4173)
+npm run preview    # serve the production build
 ```
 
-The build is a static site with a relative base, so it works from any path. After the first load it runs offline (a service worker pre-caches every asset). No backend, no accounts, no external requests: fonts are bundled.
+The build is a static site: no backend, no accounts, no external requests, and fonts are bundled. After the first load a service worker lets it run offline.
 
-## Deploy
+Deploy: push to `main` and the GitHub Pages workflow in `.github/workflows/pages.yml` publishes it (set *Settings → Pages → Source: GitHub Actions* once). Netlify also works: build `npm run build`, publish `dist`.
 
-**GitHub Pages** — push to `main`; the workflow in `.github/workflows/pages.yml` builds and publishes. In the repository go to *Settings → Pages → Source: GitHub Actions* once.
+## Demo script (about two minutes)
 
-**Netlify** — import the repository; build command `npm run build`, publish directory `dist`. Or drag the `dist/` folder onto Netlify Drop.
+Press **Demo mode** in the top bar.
 
-## Demo script (≈2 minutes)
+1. Crew view, day 130: four personal baselines, everyone normal.
+2. Commander's view, day 130: no alerts.
+3. Day 139: early-infection pattern, before fever.
+4. Day 142: fever, readiness drops to Not fit, contagion alert for the crew.
+5. Day 151: solar storm, countdown and shelter checklist for everyone.
+6. Mars surface: gravity-transition protocol for the partner-agency specialist.
+7. Medical packet to Earth with the delay shown.
 
-Press **Demo mode** in the top bar. It drives the real app:
+## How it is built
 
-1. Crew view, day 130 — four personal baselines, everyone normal.
-2. Commander's individual view, day 130 — no alerts.
-3. Day 139 — early-infection pattern detected **before** fever.
-4. Day 142 — fever, readiness drops to **Not fit**, contagion alert for the crew.
-5. Day 151 — solar storm: countdown and shelter checklist for the whole crew.
-6. Mars surface — gravity-transition protocol for MS2.
-7. Medical packet to Earth showing the up-to-20-minute delay.
-8. Close: *"On Mars, the doctor is up to 20 minutes away."*
+Vite and vanilla ES modules. The 3D body uses Three.js with a model derived from BodyParts3D (see credits), compressed to a 690 KB GLB by `scripts/build-anatomy.mjs`. A procedural body shows while it loads, and a Canvas 2D point-cloud version is the fallback without WebGL. The data comes from a seeded generator with one series per crew member. A small hand-written service worker handles offline use. Fonts (Barlow Condensed, JetBrains Mono, Inter) come from Fontsource under the SIL OFL.
 
-## Tech
+The code map is in [`CLAUDE.md`](CLAUDE.md), design tokens in [`docs/design/`](docs/design), and our research notes (in Spanish) in [`docs/brain/`](docs/brain).
 
-Vite · vanilla ES modules · **Three.js WebGL anatomy**: a real human body and organs from BodyParts3D (glass skin with a fresnel rim and contour lines, pearl organs that light up amber/red on alert, soft bloom, accessible "+" pins, camera fly-to, orbit/zoom), built into a 690 KB meshopt-compressed GLB by `scripts/build-anatomy.mjs`, with a procedural body as the loading/failure fallback · Canvas 2D point-cloud hologram as the no-WebGL fallback · SVG mini-map · deterministic simulated data (seeded generator, one series per crew member) · hand-written service worker emitted at build time. Fonts bundled via Fontsource (SIL OFL): Barlow Condensed, JetBrains Mono and Inter. Visual language: dark mission-control canvas with hairline rules and a cinematic intro; colour and glow are reserved for live data and medical status.
+## NASA data and resources
 
-Code map: see [`CLAUDE.md`](CLAUDE.md). Design tokens: [`docs/design/`](docs/design). Team research notes (Spanish): [`docs/brain/`](docs/brain).
-
-## NASA Data & Resources
-
-What we used and how. Thresholds built on them are **illustrative**.
+The thresholds built on these are illustrative.
 
 | Resource | How we used it |
 |---|---|
-| **NASA HRP — Five Hazards of Human Spaceflight** (radiation, isolation and confinement, distance from Earth, gravity fields, hostile/closed environments) | Backbone of the app: hazard filters on the hologram, and the reason alerts combine indicators (hazards "feed each other"). |
-| **NASA HRP — Risks of Human Spaceflight** | Maps organs/indicators to HRP risks (immune, cardiovascular, sensorimotor/vestibular, bone, nutrition, behavioural health, sleep, SANS, radiation…). |
-| **ARCHeR** (Artemis Research for Crew Health & Readiness) | Precedent for wrist actigraphy (movement, sleep, light), crew-interaction questions and measuring against a personal baseline. "ARCHeR measures; we close the loop." |
-| **Immune Biomarkers** (Artemis II) | Stress → immunity link; skin lesions / localised pain in the symptom checklist; saliva-sample reminder. |
-| **Artemis II Standard Measures** | Balance / motion-sickness test, strength measure and the functional "readiness for a critical task" idea. |
-| **Curiosity RAD dose rates** | 1.8 mSv/day in transit and 0.67 mSv/day on the Mars surface for the radiation module. |
-| **NASA career radiation limit (600 mSv)** and short-term 250 mSv figure | Cumulative-dose gauge, projection and solar-event alert. |
-| **Partner agency: CSA — CANS** (Canadian Active Neutron Spectrometer) | Model for the on-board autonomous dosimeter feeding the radiation module. |
+| NASA HRP, Five Hazards of Human Spaceflight | Hazard filters on the hologram and the reason alerts combine indicators. |
+| NASA HRP, Risks of Human Spaceflight | Links organs and indicators to HRP risks (immune, cardiovascular, sensorimotor, bone, behavioural health, sleep, SANS, radiation). |
+| ARCHeR | Precedent for wrist actigraphy, crew-interaction questions and measuring against a personal baseline. |
+| Immune Biomarkers (Artemis II) | Stress–immunity link and the symptom checklist. |
+| Artemis II Standard Measures | Balance test, strength measure and the readiness-for-a-task idea. |
+| Curiosity RAD dose rates | 1.8 mSv/day in transit and 0.67 mSv/day on the Mars surface. |
+| NASA career radiation limit (600 mSv), 250 mSv short-term figure | Cumulative-dose gauge, projection and solar-event alert. |
+| CSA CANS (partner agency) | Model for the on-board dosimeter behind the radiation module. |
 
-Sources are listed in [`docs/brain/Cerebro-SpaceApps-2026/Fuentes.md`](docs/brain/Cerebro-SpaceApps-2026/Fuentes.md). NASA does not endorse this project; no NASA insignia, logotype, seal or mission patch is used.
+Sources are listed in [`docs/brain/Cerebro-SpaceApps-2026/Fuentes.md`](docs/brain/Cerebro-SpaceApps-2026/Fuentes.md). NASA does not endorse this project, and no NASA logo, seal or mission patch is used.
 
 ## Use of AI
 
-The application code was written with AI assistance: **Claude Code** (Anthropic; Claude Fable 5.2, Claude Sonnet 5.5 and Claude Opus 5.5) ported the single-file prototype to modules and implemented the crew model, Crew view, GO / NO-GO poll, contagion and privacy logic, demo mode, mini-map, offline support, the 3D body and the visual design, under the team's direction and review. Research notes and the product concept were prepared by the team with AI assistance and checked against the NASA and CSA pages cited above. **Crew portraits** are the team members' own photos edited with **Higgsfield** (AI image generation) to dress them in a white spacesuit with a Space Apps Challenge patch (also drawn by the AI edit); each one shows a visible "AI-generated" mark in the app. Any other AI-generated logo or banner artwork used in the team page or slides carries a visible "AI-generated" watermark.
+The application code was written with AI assistance. We used Claude Code (Anthropic) to port our first single-file prototype to modules and to build the crew model, crew view, contagion and privacy logic, demo mode, mini-map, offline support, the 3D body and the visual design, with us directing and reviewing. We prepared the research notes and product concept with AI help and checked them against the NASA and CSA pages above.
+
+The crew portraits are our own photos edited with Higgsfield (AI image generation) into spacesuit portraits. Each one carries a visible "AI-generated" mark in the app and in the screenshots above. Any other AI-made artwork in our slides is marked the same way.
 
 ## Roadmap
 
-Analog missions (CHAPEA-like) → Artemis lunar missions → lunar base → Mars.
+Analog missions (CHAPEA-like), then Artemis lunar missions, a lunar base, and Mars.
 
 ## Credits and licences
 
-Code: MIT-style, for the competition entry. Fonts: SIL Open Font License via Fontsource.
+Code is shared for the competition entry. Fonts are under the SIL Open Font License via Fontsource.
 
-**3D anatomy** (`public/models/anatomy.glb`): derived from **BodyParts3D, © The Database Center for Life Science (DBCLS)**, licensed under [CC BY-SA 2.1 Japan](https://creativecommons.org/licenses/by-sa/2.1/jp/deed.en). Source meshes taken from the STL copies at [github.com/Kevin-Mattheus-Moerman/BodyParts3D](https://github.com/Kevin-Mattheus-Moerman/BodyParts3D); we merged, simplified, re-oriented and compressed them (`scripts/build-anatomy.mjs`). The derived model is shared under the same licence (CC BY-SA 2.1 JP).
- Crew portraits are the team members themselves; any AI-generated portrait carries a visible "AI-generated" mark.
+The 3D anatomy (`public/models/anatomy.glb`) is derived from BodyParts3D, © The Database Center for Life Science (DBCLS), licensed under [CC BY-SA 2.1 Japan](https://creativecommons.org/licenses/by-sa/2.1/jp/deed.en). Source meshes come from the STL copies at [github.com/Kevin-Mattheus-Moerman/BodyParts3D](https://github.com/Kevin-Mattheus-Moerman/BodyParts3D). We merged, simplified, re-oriented and compressed them, and share the derived model under the same licence.
