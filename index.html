@@ -125,6 +125,8 @@
   <form class="modal-box" id="ciForm">
     <h2 id="ciTitle" data-i18n="ci_title">Daily check-in</h2>
     <p class="modal-sub" data-i18n="ci_sub">1 minute. Your answers are compared with your own baseline.</p>
+    <div class="field"><span class="eyebrow" data-i18n="ci_ctx">Measurement context</span>
+      <div class="seg ci-ctx" role="group" id="ciCtx"><button type="button" data-ctx="rest" aria-pressed="true" data-i18n="ci_rest">At rest</button><button type="button" data-ctx="post" aria-pressed="false" data-i18n="ci_post">Post-exercise</button></div></div>
     <div class="field"><span class="eyebrow" data-i18n="ci_mood">How do you feel today?</span><div class="moods" id="moods"></div></div>
     <div class="field"><div class="field-row"><span class="eyebrow" data-i18n="ci_sleep">Hours of sleep</span><b class="mono" id="sleepOut">7.0 h</b></div><input class="slim" type="range" id="ciSleep" min="3" max="10" step="0.5" value="7"></div>
     <div class="field"><span class="eyebrow" data-i18n="ci_water">Water today (0.5 L pouches)</span>

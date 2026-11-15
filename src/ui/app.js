@@ -9,6 +9,7 @@ import { evaluate } from '../core/engine.js';
 import { selectOrgan, frame, resize } from '../holo/holo2d.js';
 import { attachECG } from './ecg.js';
 import { portrait } from './portrait.js';
+import { openTrend } from './trend.js';
 
 const fmt=(v,dec)=>typeof v==='number'? v.toFixed(dec) : v;
 const shape=s=>`<i class="shape s${s}"></i>`;
@@ -75,7 +76,9 @@ let packetTimer=null, packetLeft=0, packetTotal=0;
 function renderRight(){
   const R=$('right'); const E=S.EVAL;
   if(S.selected){ R.innerHTML=organDetail(S.selected); R.querySelector('.back').onclick=()=>selectOrgan(null);
-    const pk=R.querySelector('.pack-earth'); if(pk) pk.onclick=sendPacket; return; }
+    const pk=R.querySelector('.pack-earth'); if(pk) pk.onclick=sendPacket;
+    R.querySelectorAll('.tr-open').forEach(b=>b.onclick=()=>openTrend(b.dataset.k));
+    R.querySelectorAll('[data-test]').forEach(b=>b.onclick=()=>runCheck(b.dataset.test)); return; }
   const lvl=E.score>=75?0:E.score>=50?1:2; const lab=[t('ready'),t('review'),t('notfit')][lvl];
   const rate=ENV[S.env].rate; const left=DOSE_LIMIT-E.dose; const proj=rate? Math.round(left/rate):null;
   const m=CREW_BY_ID[S.member], pct=Math.round(E.dose/DOSE_LIMIT*100);
@@ -98,6 +101,7 @@ function renderRight(){
     <div class="block-head"><span class="eyebrow">${t('alerts')}</span><span class="eyebrow mono">${String(E.P.length).padStart(2,'0')}</span></div>
     ${E.P.length? E.P.map(p=>`<div class="alert s${p.s}" role="button" tabindex="0" data-organ="${p.organ}"><span class="eyebrow c${p.s}">${shape(p.s)}${t(['st0','st1','st2'][p.s])} · ${ORG[p.organ][LANG].name}</span><b>${p.title}</b>${p.ev&&p.ev.length?`<ul class="ev">${p.ev.map(x=>`<li>${x}</li>`).join('')}</ul>`:''}<p>${p.desc}</p><p class="act">→ ${p.act}</p><p class="esc">${t('escalate_to')} <span>${p.esc==='earth'?t('esc_earth'):t('esc_crew')}</span></p></div>`).join('') : `<div class="empty"><span class="c0">${shape(0)}</span>${t('no_alerts')}</div>`}
   </div>
+  ${checksBlock(E)}
   <div class="block fade-in">
     <div class="block-head"><span class="eyebrow">${t('radiation')}</span>${pill(E.M.dose.s)}</div>
     <div class="stat-row"><b class="stat">${Math.round(E.dose)}</b><span class="stat-unit">mSv · ${pct}% ${t('career')}</span></div>
@@ -115,13 +119,14 @@ function renderRight(){
   </div></section>`;
   requestAnimationFrame(()=>{ const b=$('doseBar'); if(b) b.style.width=Math.min(100,pct)+'%'; });
   R.querySelectorAll('.sys').forEach(b=>b.onclick=()=>selectOrgan(b.dataset.organ));
+  R.querySelectorAll('.chk').forEach(b=>b.onclick=()=>runCheck(b.dataset.c));
   R.querySelectorAll('.alert').forEach(a=>{ a.onclick=()=>selectOrgan(a.dataset.organ); a.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectOrgan(a.dataset.organ); } }; });
   $('sendPacket').onclick=sendPacket; renderPacket();
 }
 function organDetail(id){
   const o=ORG[id], L=o[LANG], E=S.EVAL, st=E.O[id];
   const rows=o.metrics.map(k=>{ const m=E.M[k]; const b=m.b===null||m.b===undefined?'—': typeof m.b==='number'? m.b.toFixed(METRICS[k].dec) : m.b;
-    return `<tr><td>${mName(k)}</td><td class="v"><span class="c${m.s}">${shape(m.s)}</span>${fmt(m.v,METRICS[k].dec)} <span class="stat-unit">${METRICS[k].unit}</span></td><td class="b">${b}</td><td>${['vestibular','vision','symptoms','dose'].includes(k)?'':spark(k,S.day,m.s,72,20)}</td></tr>`; }).join('');
+    return `<tr><td>${mName(k)}</td><td class="v"><span class="c${m.s}">${shape(m.s)}</span>${fmt(m.v,METRICS[k].dec)} <span class="stat-unit">${METRICS[k].unit}</span></td><td class="b">${b}</td><td>${['vestibular','vision','symptoms','dose'].includes(k)?'':`<button class="tr-open" data-k="${k}" aria-label="${t('tr_open')}: ${mName(k)}" title="${t('tr_open')}">${spark(k,S.day,m.s,72,20)}</button>`}</td></tr>`; }).join('');
   const pats=E.P.filter(p=>p.organ===id).map(p=>`<div class="alert s${p.s}"><span class="eyebrow c${p.s}">${shape(p.s)}${t(['st0','st1','st2'][p.s])}</span><b>${p.title}</b><p>${p.desc}</p></div>`).join('');
   return `<div class="fade-in">
     <button class="back"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>${t('back')}</button>
@@ -136,6 +141,36 @@ function organDetail(id){
     <div class="card"><details open><summary>${t('how')}</summary><ol class="steps">${L.how.map(s=>`<li>${s}</li>`).join('')}</ol></details></div>
   </div>`;
 }
+
+/* Scheduled checks (rest / post-exercise / supplements / tests), not 24/7 hospital monitoring.
+   Intensive monitoring (every 4 h) switches on only during contingencies: a system in review/alert, a solar storm,
+   or a gravity transition on Mars. Done items are kept per astronaut and day. */
+const DONE={};
+const doneSet=()=>(DONE[S.member+'|'+S.day] ||= new Set());
+function markDone(c){ doneSet().add(c); }
+function intensiveWhy(E){
+  const why=Object.keys(SYS).filter(k=>E.Y[k]>0).map(k=>SYS[k][LANG].short);
+  if(S.env==='mars') why.push(t('env_mars'));
+  return why;
+}
+function checksBlock(E){
+  const why=intensiveWhy(E), on=why.length>0, D=doneSet();
+  const items=[['rest','07:00'],['post','17:30'],['bcx','08:00'],['amsler','—'],['react','—'],['checkin','21:00']];
+  const slots=on? [['slot12','12:00'],['slot16','16:00'],['slot20','20:00']] : [];
+  const row=([c,time])=>{ const dn=D.has(c); return `<li><button class="chk" data-c="${c}" aria-pressed="${dn}"><span class="box">${dn?'✓':''}</span><span class="chk-t mono">${time}</span><span class="chk-l">${t('chk_'+c.replace(/\d+$/,''))}</span></button></li>`; };
+  const n=items.concat(slots).filter(([c])=>D.has(c)).length, tot=items.length+slots.length;
+  return `<div class="block fade-in checks${on?' intensive':''}">
+    <div class="block-head"><span class="eyebrow">${on? `<span class="c1">${shape(1)}</span> ${t('chk_int')}` : t('chk_sched')}</span><span class="eyebrow mono">${n}/${tot}</span></div>
+    <p class="poll-rule">${on? t('chk_int_why').replace('{w}',why.join(' · ')) : t('chk_sched_note')}</p>
+    <ul class="chk-list">${items.map(row).join('')}${slots.map(row).join('')}</ul>
+  </div>`;
+}
+function runCheck(c){
+  if((c==='amsler'||c==='react') && actions.openTest){ actions.openTest(c); return; }
+  if(c==='checkin'){ openCheckin(); return; }
+  const D=doneSet(); D.has(c)? D.delete(c) : D.add(c); renderRight();
+}
+actions.markDone=c=>{ markDone(c); if(!S.selected) renderRight(); };
 
 /* Deterministic, auditable protocol: every deviation runs the same 3 steps (verify → countermeasure → re-evaluate / Earth). */
 function protocolCard(id,st){
@@ -239,12 +274,16 @@ function renderCheckin(){
   $('symp').querySelectorAll('button').forEach(b=>b.onclick=()=>{ const s=b.dataset.s; ci.symptoms.has(s)?ci.symptoms.delete(s):ci.symptoms.add(s); renderCheckin(); });
 }
 $('openCheckin').onclick=openCheckin;
+document.querySelectorAll('#ciCtx button').forEach(b=>b.onclick=()=>document.querySelectorAll('#ciCtx button').forEach(x=>x.setAttribute('aria-pressed',x===b)));
 $('ciCancel').onclick=()=>$('checkin').classList.remove('on');
 $('ciSleep').oninput=e=>$('sleepOut').textContent=(+e.target.value).toFixed(1)+' h';
 $('wMinus').onclick=()=>{ci.water=Math.max(0,ci.water-1);renderCheckin();};
 $('wPlus').onclick=()=>{ci.water=Math.min(10,ci.water+1);renderCheckin();};
 $('ciForm').onsubmit=e=>{ e.preventDefault();
-  S.overrides[S.day]={mood:ci.mood, sleep:+$('ciSleep').value, water:+(ci.water*0.5).toFixed(1), symptoms:[...ci.symptoms]};
+  const ctx=document.querySelector('#ciCtx [aria-pressed="true"]')?.dataset.ctx||'rest';
+  S.overrides[S.day]={...(S.overrides[S.day]||{}), mood:ci.mood, sleep:+$('ciSleep').value, water:+(ci.water*0.5).toFixed(1), symptoms:[...ci.symptoms],
+    ctx, crewRel:+$('ciCrew').value, journal:$('ciJournal').value.trim()};
+  markDone('checkin'); markDone(ctx);
   S.streak++; $('checkin').classList.remove('on'); toast(`${t('ci_done')} ${S.streak}`,'ok'); setDay(S.day);
 };
 document.addEventListener('keydown',e=>{ if(e.key==='Escape'){ $('checkin').classList.remove('on'); if(S.selected) selectOrgan(null); } });

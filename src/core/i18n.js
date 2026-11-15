@@ -154,3 +154,23 @@ Object.assign(STR.es,{ sys_title:"5 sistemas fisiológicos", proto_title:"Protoc
   step_verify:"Verifica la toma", step_counter:"Contramedida", step_reeval:"Reevalúa o envía a Tierra",
   pack_earth:"Empaquetar telemetría para Tierra", nasa_ref:"Referencias NASA",
   env_nominal:"Nominal", env_spe:"Alerta SPE", env_nominal_l:"Entorno de radiación nominal", env_spe_l:"Evento de partículas solares: ve al refugio" });
+
+/* Scheduled checks, intensive monitoring, trend history, check-in context. */
+Object.assign(STR.en,{ chk_sched:"Scheduled checks", chk_int:"Intensive monitoring · every 4 h",
+  chk_sched_note:"Daily checks at rest and after exercise to catch trends over days, not 24/7 hospital monitoring.",
+  chk_int_why:"Active during a contingency: {w}. Back to scheduled checks when every system is normal.",
+  chk_rest:"Rest vitals: cuff, heart rate, SpO₂", chk_post:"Post-exercise vitals after the resistive session", chk_bcx:"B-complex supplement",
+  chk_amsler:"Amsler grid (vision)", chk_react:"Reaction micro-test", chk_checkin:"Daily check-in", chk_slot:"Vitals + temperature",
+  ci_ctx:"Measurement context", ci_rest:"At rest", ci_post:"Post-exercise",
+  tr_open:"History", tr_close:"Close", tr_base:"Baseline",
+  tr_sub:"Days 1–{d}. Band = your own baseline (days 1–14), mean ± 1 SD. Lines: early-infection day and solar storm.",
+  tr_bp:"Systolic pressure shown." });
+Object.assign(STR.es,{ chk_sched:"Chequeos programados", chk_int:"Monitoreo intensivo · cada 4 h",
+  chk_sched_note:"Chequeos diarios en reposo y post-ejercicio para detectar tendencias en días, no monitoreo hospitalario 24/7.",
+  chk_int_why:"Activo durante una contingencia: {w}. Vuelve a chequeos programados cuando todos los sistemas estén normales.",
+  chk_rest:"Signos en reposo: brazalete, pulso, SpO₂", chk_post:"Signos post-ejercicio tras la rutina resistiva", chk_bcx:"Suplemento B-Complex",
+  chk_amsler:"Rejilla de Amsler (visión)", chk_react:"Micro-test de reacción", chk_checkin:"Check-in diario", chk_slot:"Signos + temperatura",
+  ci_ctx:"Contexto de la medición", ci_rest:"En reposo", ci_post:"Post-ejercicio",
+  tr_open:"Historial", tr_close:"Cerrar", tr_base:"Línea base",
+  tr_sub:"Días 1–{d}. Banda = tu propia línea base (días 1–14), media ± 1 DE. Líneas: día de infección temprana y tormenta solar.",
+  tr_bp:"Se muestra la presión sistólica." });

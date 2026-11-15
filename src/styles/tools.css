@@ -26,3 +26,30 @@
 .env-trig.c2{border-color:var(--bad);text-shadow:var(--glow);animation:spePulse 1.6s ease-in-out infinite}
 @keyframes spePulse{50%{border-color:transparent}}
 @media (max-width:1100px){.sys-list{grid-template-columns:repeat(5,minmax(0,1fr))}.sys{padding:8px 5px}.sys-n{font-size:11px}.sys-s{font-size:8.5px;letter-spacing:.04em}}
+
+/* scheduled checks / intensive monitoring */
+.checks.intensive{border-top-color:var(--warn)}
+.chk-list{list-style:none;margin:10px 0 0;padding:0}
+.chk{display:grid;grid-template-columns:20px 46px 1fr;align-items:center;gap:10px;width:100%;padding:9px 0;border-top:1px solid var(--rule-soft);text-align:left;font:400 14px/1.35 var(--f-ui)}
+.chk .box{width:18px;height:18px;border:1px solid var(--rule);border-radius:50%;display:grid;place-items:center;font-size:11px;color:var(--black)}
+.chk[aria-pressed="true"] .box{background:var(--ok);border-color:var(--ok);box-shadow:0 0 8px var(--ok)}
+.chk[aria-pressed="true"] .chk-l{color:var(--gray);text-decoration:line-through;text-decoration-color:var(--rule)}
+.chk-t{font-size:12px;color:var(--gray)}
+.chk:hover .chk-l{color:var(--holo)}
+.ci-ctx{margin-top:10px}
+
+/* trend history */
+.tr-box{width:min(760px,100%)}
+.tr-head{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tr-svg{display:block;width:100%;height:auto;margin-top:16px}
+.tr-ax{font:400 10px var(--f-mono);fill:var(--gray)}
+.tr-grid{stroke:rgba(150,200,255,.08)}
+.tr-band{fill:rgba(91,214,255,.10)}
+.tr-basewin{fill:rgba(91,214,255,.05)}
+.tr-mean{stroke:var(--holo);stroke-dasharray:3 4;stroke-opacity:.7}
+.tr-line{fill:none;stroke:#E6EDF5;stroke-opacity:.45;stroke-width:1.2}
+.tr-evt{stroke-dasharray:2 3}.tr-evt.warn{stroke:var(--warn)}.tr-evt.bad{stroke:var(--bad)}
+.tr-legend{flex-wrap:wrap;margin-top:12px}
+.tr-key.band{display:inline-block;width:16px;height:8px;background:rgba(91,214,255,.25)}
+.tr-open{display:block;padding:2px;border:1px solid transparent;border-radius:2px;cursor:zoom-in}
+.tr-open:hover,.tr-open:focus-visible{border-color:var(--holo)}
