@@ -96,6 +96,17 @@ The application code was written with AI assistance. We used Claude Code (Anthro
 
 The crew portraits are our own photos edited with Higgsfield (AI image generation) into spacesuit portraits. Each one carries a visible "AI-generated" mark in the app and in the screenshots above. Any other AI-made artwork in our slides is marked the same way.
 
+## Team
+
+The four of us also play the crew in the demo, so the portraits you see are the team (AI-edited, marked as such).
+
+| Scenario role | Team member |
+|---|---|
+| Commander (CDR) | Mauro Acuña Olivarria |
+| Pilot (PLT) | Alan Alberto López García |
+| Mission Specialist 1, Crew Medical Officer (MS1) | Jorge René Moreno Mata |
+| Mission Specialist 2, partner agency (MS2) | David Sevilla |
+
 ## Roadmap
 
 Analog missions (CHAPEA-like), then Artemis lunar missions, a lunar base, and Mars.
