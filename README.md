@@ -3,6 +3,8 @@
 **Health Evaluation & Astronaut Readiness Tool**
 Our entry for the NASA Space Apps Challenge 2026, challenge *Create Health Monitoring Software for Astronauts on Space Missions*.
 
+**Live app: https://mauspaces.github.io/heart-space-apps/** (works offline after the first load)
+
 ![Crew view: four crew members with EVA go / no-go, top alert and privacy switches](docs/screenshots/crew-view.webp)
 
 *Prototype · simulated data · illustrative thresholds · not for clinical use. The crew is played by the four of us. No real astronaut's name, photo or likeness appears, and every health value is simulated.*

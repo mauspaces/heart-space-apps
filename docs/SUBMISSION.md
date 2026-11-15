@@ -8,7 +8,7 @@ H.E.A.R.T (Health Evaluation & Astronaut Readiness Tool) answers the challenge "
 
 ## 3. Project
 https://github.com/mauspaces/heart-space-apps
-Published app: <GitHub Pages / Netlify URL — TO FILL IN after checking it opens>
+Published app: https://mauspaces.github.io/heart-space-apps/
 
 ## 4. Project Details
 **Data and variables.** A seeded generator creates 180 days of simulated data for four fictional crew roles (Commander, Pilot, Crew Medical Officer, Mission Specialist from a partner agency), played by the team members. Variables: heart rate, HRV, blood pressure, SpO2, temperature, sleep, glucose, mood, hydration, exercise, symptoms and daily radiation dose. Each member has their own storyline: early infection then fever (days 139–146), a sleep-loss and low-mood dip (days 95–120), low hydration with kidney-stone risk (days 126–131), and vestibular/orthostatic issues on arrival at Mars. All share a solar storm on day 151.
