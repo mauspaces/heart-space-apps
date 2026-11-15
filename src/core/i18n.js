@@ -105,8 +105,10 @@ Object.assign(STR.es,{
   demo_start:"Modo demo"
 });
 
-Object.assign(STR.en,{ boot_line:"On Mars, the doctor is up to 20 minutes away. Every astronaut becomes their own first responder." });
-Object.assign(STR.es,{ boot_line:"En Marte, el médico está hasta a 20 minutos. Cada astronauta se vuelve su propio primer respondiente." });
+Object.assign(STR.en,{ boot_hook:"On Mars, the doctor is up to 20 minutes away.", boot_line:"Every astronaut becomes their own first responder.",
+  boot_sys:["Biometric link", "Baseline days 1–14", "Crew 4 / 4", "Hazard model"], boot_ok:"Online" });
+Object.assign(STR.es,{ boot_hook:"En Marte, el médico está hasta a 20 minutos.", boot_line:"Cada astronauta se vuelve su propio primer respondiente.",
+  boot_sys:["Enlace biométrico", "Línea base días 1–14", "Tripulación 4 / 4", "Modelo de riesgos"], boot_ok:"En línea" });
 
 /* GO / NO-GO poll, evidence, escalation, light-time, data provenance. */
 Object.assign(STR.en,{

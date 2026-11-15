@@ -20,15 +20,18 @@ const SHAPE = ['●', '▲', '◆'];
 const VERT = `varying vec3 vN; varying vec3 vV; varying vec3 vW;
 void main(){ vec4 wp=modelMatrix*vec4(position,1.); vW=wp.xyz; vN=normalize(mat3(modelMatrix)*normal); vV=normalize(cameraPosition-wp.xyz); gl_Position=projectionMatrix*viewMatrix*wp; }`;
 /* contour lines every 1/uFreq m along y, 1px wide on screen thanks to fwidth; a slow scan darkens them */
-const FRAG = `uniform vec3 uColor; uniform float uScanY,uBase,uRim,uLine,uFreq,uAlpha,uScan,uBack;
+const FRAG = `uniform vec3 uColor; uniform float uScanY,uBase,uRim,uLine,uFreq,uAlpha,uScan,uBack,uReveal;
 varying vec3 vN; varying vec3 vV; varying vec3 vW;
 void main(){
+  if(vW.y>uReveal) discard;
+  float edge=exp(-abs(vW.y-uReveal)*45.);
   float f=pow(1.-abs(dot(normalize(vN),normalize(vV))),2.);
   float y=vW.y*uFreq;
   float d=abs(fract(y-.5)-.5)/max(fwidth(y),1e-4);
   float line=1.-min(d,1.);
   float scan=exp(-abs(vW.y-uScanY)*35.)*uScan;
   float a=uBase+f*uRim+line*(uLine+scan*.45);
+  a=a+edge*.9;
   a*=gl_FrontFacing?1.:uBack;
   gl_FragColor=vec4(uColor,clamp(a*uAlpha,0.,1.));
 }`;
@@ -37,7 +40,7 @@ function mat(color, o) {
     vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false, side: THREE.DoubleSide,
     uniforms: {
       uColor: { value: color.clone() }, uScanY: { value: -9 }, uBase: { value: o.base }, uRim: { value: o.rim },
-      uLine: { value: o.line }, uFreq: { value: o.freq ?? 55 }, uAlpha: { value: 1 }, uScan: { value: o.scan ?? 1 }, uBack: { value: o.back ?? .35 },
+      uLine: { value: o.line }, uFreq: { value: o.freq ?? 55 }, uAlpha: { value: 1 }, uScan: { value: o.scan ?? 1 }, uBack: { value: o.back ?? .35 }, uReveal: { value: 9 },
     },
   });
 }
@@ -228,6 +231,10 @@ export function init3D() {
     controls.autoRotate = !REDUCED && rot && rot.getAttribute('aria-pressed') === 'true' && !S.selected && performance.now() - lastInteract > 2500;
     controls.update();
 
+    /* intro: the body builds bottom-up after the boot (S.bootEnd unset = boot still running) */
+    const rv = S.bootEnd === undefined ? -1 : !S.bootEnd || REDUCED ? 9 : (() => { const u = Math.min(1, (performance.now() - S.bootEnd) / 1600); return u >= 1 ? 9 : -0.05 + easeOut(u) * 1.85; })();
+    skin.uniforms.uReveal.value = rv; for (const id in ORGANS) ORGANS[id].mat.uniforms.uReveal.value = rv;
+    pinsEl.style.visibility = rv < 1.8 ? 'hidden' : '';
     const scanY = REDUCED ? -9 : 0.02 + (0.5 - 0.5 * Math.cos(((time / 6) % 1) * Math.PI * 2)) * 1.7;
     const camDist = camera.position.distanceTo(controls.target);
     skin.uniforms.uScanY.value = scanY;

@@ -12,10 +12,13 @@
 <div class="boot" id="boot" role="dialog" aria-label="Startup">
   <div class="boot-in">
     <span class="eyebrow boot-eyebrow" data-i18n="tagline">Health Evaluation &amp; Astronaut Readiness Tool</span>
-    <h1 class="boot-title">H.E.A.R.T</h1>
-    <p class="boot-line" data-i18n="boot_line">Every astronaut, their own first responder.</p>
+    <h1 class="boot-title" aria-label="H.E.A.R.T"><span aria-hidden="true" style="--i:0">H</span><span aria-hidden="true" style="--i:1">.</span><span aria-hidden="true" style="--i:2">E</span><span aria-hidden="true" style="--i:3">.</span><span aria-hidden="true" style="--i:4">A</span><span aria-hidden="true" style="--i:5">.</span><span aria-hidden="true" style="--i:6">R</span><span aria-hidden="true" style="--i:7">.</span><span aria-hidden="true" style="--i:8">T</span></h1>
+    <p class="boot-hook" data-i18n="boot_hook">On Mars, the doctor is up to 20 minutes away.</p>
+    <p class="boot-line" data-i18n="boot_line">Every astronaut becomes their own first responder.</p>
     <div class="boot-bar"><i id="bootBar"></i></div>
+    <ul class="boot-sys" id="bootSys" aria-hidden="true"></ul>
   </div>
+  <div class="boot-scan" aria-hidden="true"></div>
   <button class="link-btn skip" id="skipBoot" data-i18n="skip">Skip</button>
 </div>
 

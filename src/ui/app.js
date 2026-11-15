@@ -243,12 +243,27 @@ function applyLang(){
 document.querySelectorAll('[data-lang]').forEach(b=>b.onclick=()=>{ setLang(b.dataset.lang); document.querySelectorAll('[data-lang]').forEach(x=>x.setAttribute('aria-pressed',x===b)); applyLang(); });
 
 /* boot */
+/* Cinematic intro (~3.5 s): title letter by letter, the hook, a systems check, a scan line, then the console
+   assembles (panels stagger in, the 3D body builds bottom-up via S.bootEnd). Skippable; once per session; off with reduced motion. */
 function boot(){
-  const finish=()=>{ $('boot').classList.add('done'); };
-  $('skipBoot').onclick=finish;
-  if(REDUCED){ finish(); return; }
+  const el=$('boot'), body=document.body, timers=[];
+  let seen=false; try{ seen=sessionStorage.getItem('heart-boot')==='1'; }catch(e){}
+  let done=false;
+  const finish=()=>{
+    if(done) return; done=true; timers.forEach(clearTimeout);
+    el.classList.add('done'); S.bootEnd=performance.now();
+    body.classList.remove('intro'); body.classList.add('booted');
+    try{ sessionStorage.setItem('heart-boot','1'); }catch(e){}
+    document.removeEventListener('keydown',finish);
+  };
+  if(REDUCED||seen){ el.classList.add('done'); S.bootEnd=0; return; }
+  body.classList.add('intro');
+  $('skipBoot').onclick=finish; el.addEventListener('click',finish); document.addEventListener('keydown',finish);
+  const sys=t('boot_sys'), list=$('bootSys');
+  list.innerHTML=sys.map(s=>`<li><span>${s}</span><b></b></li>`).join('');
+  sys.forEach((_,i)=>timers.push(setTimeout(()=>{ const li=list.children[i]; li.classList.add('on'); li.querySelector('b').textContent=t('boot_ok'); },1500+i*280)));
   requestAnimationFrame(()=>requestAnimationFrame(()=>$('bootBar').style.width='100%'));
-  setTimeout(finish,2700);
+  timers.push(setTimeout(finish,3600));
 }
 
 /* init */
