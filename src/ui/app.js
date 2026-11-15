@@ -1,7 +1,7 @@
 /* UI rendering, timeline, solar-storm overlay, daily check-in, boot. */
 import { REDUCED, clamp, $, stColor, hexA } from '../core/util.js';
 import { LANG, setLang, t } from '../core/i18n.js';
-import { ENV, METRICS, mName, HAZ, ORG } from '../core/catalog.js';
+import { ENV, METRICS, mName, HAZ, ORG, SYS, SYS_OF } from '../core/catalog.js';
 import { DAYS, STORM_DAY, DOSE_LIMIT } from '../core/sim.js';
 import { S, val, actions, PRIV } from '../core/state.js';
 import { CREW_BY_ID } from '../core/crew.js';
@@ -59,12 +59,23 @@ function renderTop(){
   const _m=CREW_BY_ID[S.member]; document.querySelector('.mission .label').textContent=`${_m.role} · ${_m.name} · “${_m.callsign}”`;
   $('hudEnv').textContent=t('env_'+S.env).toUpperCase();
   $('hudGrav').textContent=`${t('gravity').toUpperCase()} ${ENV[S.env].g} · ${ENV[S.env].rate?ENV[S.env].rate+' mSv/d':'—'}`;
+  /* radiation as a discrete environmental trigger: NOMINAL vs solar particle event */
+  const spe=S.EVAL&&S.EVAL.P.find(p=>p.id==='spe'), es=spe?spe.s:0;
+  $('envTrig').className=`chip env-trig c${es}`; $('envTrig').innerHTML=`${shape(es)}<span>${t(spe?'env_spe':'env_nominal')}</span>`;
+  $('envTrig').title=t(spe?'env_spe_l':'env_nominal_l'); $('envTrig').setAttribute('aria-label',t(spe?'env_spe_l':'env_nominal_l'));
+}
+/* the five physiological systems as a traffic-light strip; a click opens the system's worst organ */
+function systemsStrip(Y,O){
+  return `<div class="systems fade-in"><span class="eyebrow">${t('sys_title')}</span><ul class="sys-list">${Object.keys(SYS).map(k=>{
+    const L=SYS[k][LANG], st=Y[k], org=SYS[k].organs.reduce((a,b)=>O[b]>O[a]?b:a), stw=t(['st0','st1','st2'][st]);
+    return `<li><button class="sys c${st}" data-organ="${org}" aria-label="${L.name}: ${stw}">${shape(st)}<span class="sys-n">${L.short}</span><span class="sys-s">${stw}</span></button></li>`; }).join('')}</ul></div>`;
 }
 
 let packetTimer=null, packetLeft=0, packetTotal=0;
 function renderRight(){
   const R=$('right'); const E=S.EVAL;
-  if(S.selected){ R.innerHTML=organDetail(S.selected); R.querySelector('.back').onclick=()=>selectOrgan(null); return; }
+  if(S.selected){ R.innerHTML=organDetail(S.selected); R.querySelector('.back').onclick=()=>selectOrgan(null);
+    const pk=R.querySelector('.pack-earth'); if(pk) pk.onclick=sendPacket; return; }
   const lvl=E.score>=75?0:E.score>=50?1:2; const lab=[t('ready'),t('review'),t('notfit')][lvl];
   const rate=ENV[S.env].rate; const left=DOSE_LIMIT-E.dose; const proj=rate? Math.round(left/rate):null;
   const m=CREW_BY_ID[S.member], pct=Math.round(E.dose/DOSE_LIMIT*100);
@@ -75,6 +86,7 @@ function renderRight(){
     <h1 class="who-name">${m.name}</h1>
     <p class="who-meta">${t('day')} ${S.day} / ${DAYS} · ${t('env_'+S.env)}</p>
   </header>
+  ${systemsStrip(E.Y,E.O)}
   <div class="verdict fade-in">
     <span class="eyebrow">${t('poll_title')}</span>
     <div class="go-word c${V}${goWord.length>6?' long':''}">${goWord}</div>
@@ -102,6 +114,7 @@ function renderRight(){
     <p class="poll-rule">${t('lt_note')}</p>
   </div></section>`;
   requestAnimationFrame(()=>{ const b=$('doseBar'); if(b) b.style.width=Math.min(100,pct)+'%'; });
+  R.querySelectorAll('.sys').forEach(b=>b.onclick=()=>selectOrgan(b.dataset.organ));
   R.querySelectorAll('.alert').forEach(a=>{ a.onclick=()=>selectOrgan(a.dataset.organ); a.onkeydown=e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); selectOrgan(a.dataset.organ); } }; });
   $('sendPacket').onclick=sendPacket; renderPacket();
 }
@@ -115,13 +128,26 @@ function organDetail(id){
     <div class="detail-title">${pill(st)}<h2>${L.name}</h2></div>
     <p class="what">${L.what}</p>
     ${pats}
-    <div class="card now"><span class="label">${t('what_now')}</span><p class="todo">${L.act[st]}</p></div>
+    ${protocolCard(id,st)}
     <div class="card"><table class="mtable"><tr><td class="label">${t('metric')}</td><td class="label">${t('value')}</td><td class="label">${t('base')}</td><td class="label">${t('trend')}</td></tr>${rows}</table></div>
     <div class="card"><span class="label">${t('escalate')}</span><p class="todo">${L.esc}</p>
       <dl class="kv-list"><div><dt>${t('oneway')}</dt><dd>${ENV[S.env].delayTxt}</dd></div></dl></div>
     <div class="card"><span class="label">${t('hazards_lbl')}</span><div class="chips">${o.hz.map(h=>`<span>${HAZ[h][LANG]}</span>`).join('')}</div></div>
     <div class="card"><details open><summary>${t('how')}</summary><ol class="steps">${L.how.map(s=>`<li>${s}</li>`).join('')}</ol></details></div>
   </div>`;
+}
+
+/* Deterministic, auditable protocol: every deviation runs the same 3 steps (verify → countermeasure → re-evaluate / Earth). */
+function protocolCard(id,st){
+  const sk=SYS_OF[id], Sy=SYS[sk][LANG], L=ORG[id][LANG];
+  if(!st) return `<div class="card now"><span class="label">${t('what_now')} · ${Sy.name}</span><p class="todo">${L.act[0]}</p>
+    <p class="proto-routine"><span class="label">${t('routine')}</span> ${Sy.proto[0]}</p><p class="proto-ref">${t('nasa_ref')}: ${SYS[sk].ref}</p></div>`;
+  const steps=Sy.proto[st], heads=['step_verify','step_counter','step_reeval'];
+  return `<div class="card now proto s${st}"><span class="label c${st}">${shape(st)} ${t('proto_title')} · ${Sy.name}</span>
+    <ol class="proto-steps">${steps.map((s,i)=>`<li><span class="proto-h">${i+1} · ${t(heads[i])}</span><span class="proto-t">${s}</span></li>`).join('')}</ol>
+    <p class="todo proto-act">→ ${L.act[st]}</p>
+    <button class="btn small pack-earth">${t('pack_earth')}</button>
+    <p class="proto-ref">${t('nasa_ref')}: ${SYS[sk].ref}</p></div>`;
 }
 
 function sendPacket(){

@@ -1,0 +1,28 @@
+/* Notion medical matrix: 5-system traffic lights, fixed 3-step protocol, environment trigger. */
+.systems{padding:16px 0 18px;border-top:1px solid var(--rule)}
+.sys-list{list-style:none;margin:10px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.sys{display:flex;flex-direction:column;align-items:flex-start;gap:6px;width:100%;padding:10px 8px 9px;border:1px solid var(--rule);text-align:left;transition:border-color .2s,background .2s}
+.sys:hover,.sys:focus-visible{border-color:var(--holo);background:var(--wash)}
+.sys .shape{width:9px;height:9px}
+.sys-n{font:500 13px/1 var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--ink)}
+.sys-s{font:500 10px/1 var(--f-display);letter-spacing:.1em;text-transform:uppercase}
+.sys.c1{border-color:color-mix(in srgb,var(--warn) 55%,transparent)}
+.sys.c2{border-color:color-mix(in srgb,var(--bad) 65%,transparent);background:color-mix(in srgb,var(--bad) 8%,transparent)}
+
+.proto-steps{list-style:none;margin:12px 0 0;padding:0;counter-reset:none}
+.proto-steps li{display:flex;flex-direction:column;gap:4px;padding:10px 0 10px 14px;border-left:1px solid var(--rule);position:relative}
+.proto-steps li::before{content:"";position:absolute;left:-4px;top:14px;width:7px;height:7px;border-radius:50%;background:var(--holo);box-shadow:0 0 8px var(--holo)}
+.proto.s1 .proto-steps li::before{background:var(--warn);box-shadow:0 0 8px var(--warn)}
+.proto.s2 .proto-steps li::before{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+.proto-h{font:500 11px/1 var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--gray)}
+.proto-t{font:400 15px/1.5 var(--f-ui);color:var(--ink)}
+.proto-act{margin-top:10px!important;font-size:14px!important;color:var(--gray)}
+.proto-routine{margin:12px 0 0;font:400 14px/1.5 var(--f-ui);color:var(--ink)}
+.proto-routine .label{margin-right:6px}
+.proto-ref{margin:12px 0 0;font:400 11px/1.4 var(--f-mono);color:var(--gray)}
+.pack-earth{margin-top:14px}
+
+.env-trig{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1px solid var(--rule);border-radius:20px}
+.env-trig.c2{border-color:var(--bad);text-shadow:var(--glow);animation:spePulse 1.6s ease-in-out infinite}
+@keyframes spePulse{50%{border-color:transparent}}
+@media (max-width:1100px){.sys-list{grid-template-columns:repeat(5,minmax(0,1fr))}.sys{padding:8px 5px}.sys-n{font-size:11px}.sys-s{font-size:8.5px;letter-spacing:.04em}}

@@ -2,7 +2,7 @@
    Illustrative thresholds — not for clinical use. */
 import { clamp } from './util.js';
 import { LANG, t } from './i18n.js';
-import { ORG, mName } from './catalog.js';
+import { ORG, SYS, mName } from './catalog.js';
 import { STORM_DAY } from './sim.js';
 import { S, val as valOf, baseOf, avg as avgOf, cumDose as cumDoseOf } from './state.js';
 import { CREW, CREW_BY_ID } from './crew.js';
@@ -70,6 +70,8 @@ export function evaluate(d,id=S.member){
   const O={};
   for(const id in ORG){ O[id]=Math.max(0,...ORG[id].metrics.map(k=>M[k].s)); }
   P.forEach(p=>{ O[p.organ]=Math.max(O[p.organ],p.s); });
+  // the five physiological systems: worst organ wins
+  const Y={}; for(const k in SYS){ Y[k]=Math.max(0,...SYS[k].organs.map(o=>O[o])); }
 
   // readiness for EVA
   const keys=[['sleep','f_sleep'],['hrv','f_hrv'],['temp','f_temp'],['mood','f_mood'],['vestibular','f_bal'],['symptoms','f_sym'],['spo2','f_spo2'],['hr','f_hr']];
@@ -81,5 +83,5 @@ export function evaluate(d,id=S.member){
   const POLL=[['hr','f_hr'],['hrv','f_hrv'],['temp','f_temp'],['spo2','f_spo2'],['sleep','f_sleep'],['mood','f_mood'],['vestibular','f_bal'],['symptoms','f_sym'],['dose','f_rad']];
   const poll=POLL.map(([k,lab])=>({k,lab:t(lab),s:M[k].s}));
   const verdict=Math.max(0,...poll.map(p=>p.s));
-  return {M,P,O,score,factors,dose,poll,verdict};
+  return {M,P,O,Y,score,factors,dose,poll,verdict};
 }

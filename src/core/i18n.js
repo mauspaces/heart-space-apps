@@ -29,7 +29,7 @@ export const STR = {
   sym_fatigue:"Fatiga", sym_throat:"Dolor de garganta", sym_chills:"Escalofríos", sym_headache:"Dolor de cabeza", sym_nausea:"Náusea", sym_skin:"Lesiones en la piel", sym_vision:"Visión borrosa",
   none:"Ninguno",
   pat_inf:"Posible infección incipiente", pat_inf_d:"Tu HRV bajó, duermes menos y tu temperatura sube respecto a tu línea base. Este patrón suele aparecer antes de la fiebre.",
-  pat_inf_a:"Descansa, hidrátate, usa mascarilla en áreas comunes y mide tu temperatura cada 8 h.",
+  pat_inf_a:"Descansa, hidrátate, usa mascarilla en áreas comunes y mide tu temperatura cada 4 h.",
   pat_fever:"Fiebre con patrón infeccioso", pat_fever_a:"Aíslate en tu módulo, sigue el protocolo antipirético del botiquín y envía el paquete médico a Tierra.",
   pat_ops:"Riesgo operativo por fatiga", pat_ops_d:"Tres noches con poco sueño y ánimo bajo aumentan el riesgo de errores.", pat_ops_a:"Replanifica las tareas críticas y protege tu ventana de sueño hoy.",
   pat_met:"Desacondicionamiento metabólico", pat_met_d:"Bajó tu adherencia al ejercicio y tu glucosa en ayunas subió.", pat_met_a:"Recupera tus sesiones de resistencia y revisa tus porciones.",
@@ -68,7 +68,7 @@ export const STR = {
   sym_fatigue:"Fatigue", sym_throat:"Sore throat", sym_chills:"Chills", sym_headache:"Headache", sym_nausea:"Nausea", sym_skin:"Skin lesions", sym_vision:"Blurred vision",
   none:"None",
   pat_inf:"Possible early infection", pat_inf_d:"Your HRV dropped, you sleep less and your temperature is rising versus your baseline. This pattern often appears before a fever.",
-  pat_inf_a:"Rest, hydrate, wear a mask in common areas and check your temperature every 8 h.",
+  pat_inf_a:"Rest, hydrate, wear a mask in common areas and check your temperature every 4 h.",
   pat_fever:"Fever with infectious pattern", pat_fever_a:"Isolate in your module, follow the onboard antipyretic protocol and send the medical packet to Earth.",
   pat_ops:"Operational risk from fatigue", pat_ops_d:"Three short nights plus low mood increase the risk of errors.", pat_ops_a:"Reschedule critical tasks and protect your sleep window tonight.",
   pat_met:"Metabolic deconditioning", pat_met_d:"Exercise adherence dropped and fasting glucose went up.", pat_met_a:"Resume your resistance sessions and review your portions.",
@@ -87,8 +87,8 @@ export const t = k => (STR[LANG][k] ?? STR.en[k] ?? k);
 Object.assign(STR.en,{
   crew_view:"Crew", crew_title:"Crew status", crew_sub:"Crew Medical Officer dashboard · tap a crew member for their full view",
   crew_open:"Open individual view", readiness_short:"Readiness", top_alert:"Top alert", no_top_alert:"No active alerts",
-  contagion_title:"Contagion alert", contagion_body:"{n} has a fever with an infectious pattern. Suggest monitoring the rest of the crew: temperature every 8 h, masks in common areas, shared spaces cleaned.",
-  pat_cont:"Contagion risk in the crew", pat_cont_d:"{n}: fever with an infectious pattern in the crew.", pat_cont_a:"Wear a mask in common areas and measure your temperature every 8 h.",
+  contagion_title:"Contagion alert", contagion_body:"{n} has a fever with an infectious pattern. Suggest monitoring the rest of the crew: temperature every 4 h, masks in common areas, shared spaces cleaned.",
+  pat_cont:"Contagion risk in the crew", pat_cont_d:"{n}: fever with an infectious pattern in the crew.", pat_cont_a:"Wear a mask in common areas and measure your temperature every 4 h.",
   priv_title:"Privacy", priv_crew:"Share with crew", priv_earth:"Share with Earth", priv_on:"Shared", priv_off:"Private",
   priv_private:"Private. This astronaut chose not to share details with the crew.", priv_blocked:"Sharing with Earth is off for this astronaut. Turn it on to send the packet.",
   priv_note:"The astronaut controls their own data.", ms_status:"Status", role_CDR:"Commander", role_PLT:"Pilot", role_MS1:"Mission Specialist 1 · Crew Medical Officer", role_MS2:"Mission Specialist 2",
@@ -97,8 +97,8 @@ Object.assign(STR.en,{
 Object.assign(STR.es,{
   crew_view:"Tripulación", crew_title:"Estado de la tripulación", crew_sub:"Panel del Oficial Médico · toca a un tripulante para ver su vista completa",
   crew_open:"Abrir vista individual", readiness_short:"Preparación", top_alert:"Alerta principal", no_top_alert:"Sin alertas activas",
-  contagion_title:"Alerta de contagio", contagion_body:"{n} tiene fiebre con patrón infeccioso. Sugerimos vigilar al resto de la tripulación: temperatura cada 8 h, mascarilla en áreas comunes y espacios compartidos limpios.",
-  pat_cont:"Riesgo de contagio en la tripulación", pat_cont_d:"{n}: fiebre con patrón infeccioso en la tripulación.", pat_cont_a:"Usa mascarilla en áreas comunes y mide tu temperatura cada 8 h.",
+  contagion_title:"Alerta de contagio", contagion_body:"{n} tiene fiebre con patrón infeccioso. Sugerimos vigilar al resto de la tripulación: temperatura cada 4 h, mascarilla en áreas comunes y espacios compartidos limpios.",
+  pat_cont:"Riesgo de contagio en la tripulación", pat_cont_d:"{n}: fiebre con patrón infeccioso en la tripulación.", pat_cont_a:"Usa mascarilla en áreas comunes y mide tu temperatura cada 4 h.",
   priv_title:"Privacidad", priv_crew:"Compartir con la tripulación", priv_earth:"Compartir con la Tierra", priv_on:"Compartido", priv_off:"Privado",
   priv_private:"Privado. Este astronauta decidió no compartir detalles con la tripulación.", priv_blocked:"Compartir con la Tierra está desactivado para este astronauta. Actívalo para enviar el paquete.",
   priv_note:"El astronauta controla sus propios datos.", ms_status:"Estado", role_CDR:"Comandante", role_PLT:"Piloto", role_MS1:"Especialista de misión 1 · Oficial Médica", role_MS2:"Especialista de misión 2",
@@ -144,3 +144,13 @@ Object.assign(STR.es,{
 
 Object.assign(STR.en,{ crew_portrayed:"Crew portrayed by the H.E.A.R.T team members. All health data is simulated." });
 Object.assign(STR.es,{ crew_portrayed:"Tripulación interpretada por los integrantes del equipo H.E.A.R.T. Todos los datos de salud son simulados." });
+
+/* Five systems, 3-step protocol, environment trigger (Notion medical matrix). */
+Object.assign(STR.en,{ sys_title:"5 physiological systems", proto_title:"Protocol · 3 fixed steps", routine:"Routine",
+  step_verify:"Verify the measurement", step_counter:"Countermeasure", step_reeval:"Re-evaluate or send to Earth",
+  pack_earth:"Package telemetry for Earth", nasa_ref:"NASA references",
+  env_nominal:"Nominal", env_spe:"SPE alert", env_nominal_l:"Radiation environment nominal", env_spe_l:"Solar particle event: go to the storm shelter" });
+Object.assign(STR.es,{ sys_title:"5 sistemas fisiológicos", proto_title:"Protocolo · 3 pasos fijos", routine:"Rutina",
+  step_verify:"Verifica la toma", step_counter:"Contramedida", step_reeval:"Reevalúa o envía a Tierra",
+  pack_earth:"Empaquetar telemetría para Tierra", nasa_ref:"Referencias NASA",
+  env_nominal:"Nominal", env_spe:"Alerta SPE", env_nominal_l:"Entorno de radiación nominal", env_spe_l:"Evento de partículas solares: ve al refugio" });

@@ -10,6 +10,7 @@ import './styles/crew.css';
 import './styles/minimap.css';
 import './styles/demo.css';
 import './styles/holo3d.css';
+import './styles/tools.css';
 import './ui/crew.js';
 import './ui/minimap.js';
 import './ui/demo.js';
