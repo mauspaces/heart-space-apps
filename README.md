@@ -1,9 +1,16 @@
-# H.E.A.R.T
+<p align="center"><img src="docs/logo.svg" alt="H.E.A.R.T" width="560"></p>
 
-**Health Evaluation & Astronaut Readiness Tool**
-Our entry for the NASA Space Apps Challenge 2026, challenge *Create Health Monitoring Software for Astronauts on Space Missions*.
+<p align="center">
+<b>NASA Space Apps Challenge 2026</b> · <i>Create Health Monitoring Software for Astronauts on Space Missions</i><br><br>
+<a href="https://mauspaces.github.io/heart-space-apps/"><img src="https://img.shields.io/badge/Live_app-open-3CF0A8?style=for-the-badge" alt="Live app"></a>
+<img src="https://img.shields.io/badge/Offline-ready-5BD6FF?style=for-the-badge" alt="Offline ready">
+<img src="https://img.shields.io/badge/Data-simulated-F5B841?style=for-the-badge" alt="Simulated data">
+<img src="https://img.shields.io/badge/EN_%2F_ES-bilingual-lightgrey?style=for-the-badge" alt="English and Spanish">
+</p>
 
-**Live app: https://mauspaces.github.io/heart-space-apps/** (works offline after the first load)
+<p align="center"><a href="#the-problem">Problem</a> · <a href="#what-it-does">Features</a> · <a href="#try-it">Run</a> · <a href="#demo-script-about-two-minutes">Demo</a> · <a href="#nasa-data-and-resources">NASA data</a> · <a href="#use-of-ai">Use of AI</a></p>
+
+<p align="center"><b>Live app: <a href="https://mauspaces.github.io/heart-space-apps/">https://mauspaces.github.io/heart-space-apps/</a></b></p>
 
 ![Crew view: four crew members with EVA go / no-go, top alert and privacy switches](docs/screenshots/crew-view.webp)
 
