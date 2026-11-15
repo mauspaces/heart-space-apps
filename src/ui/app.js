@@ -126,7 +126,7 @@ function renderRight(){
 function organDetail(id){
   const o=ORG[id], L=o[LANG], E=S.EVAL, st=E.O[id];
   const rows=o.metrics.map(k=>{ const m=E.M[k]; const b=m.b===null||m.b===undefined?'—': typeof m.b==='number'? m.b.toFixed(METRICS[k].dec) : m.b;
-    return `<tr><td>${mName(k)}</td><td class="v"><span class="c${m.s}">${shape(m.s)}</span>${fmt(m.v,METRICS[k].dec)} <span class="stat-unit">${METRICS[k].unit}</span></td><td class="b">${b}</td><td>${['vestibular','vision','symptoms','dose'].includes(k)?'':`<button class="tr-open" data-k="${k}" aria-label="${t('tr_open')}: ${mName(k)}" title="${t('tr_open')}">${spark(k,S.day,m.s,72,20)}</button>`}</td></tr>`; }).join('');
+    return `<tr><td>${mName(k)}</td><td class="v"><span class="c${m.s}">${shape(m.s)}</span>${fmt(m.v,METRICS[k].dec)} <span class="stat-unit">${METRICS[k].unit}</span></td><td class="b">${b}</td><td>${['vestibular','vision','symptoms','dose','rt'].includes(k)?'':`<button class="tr-open" data-k="${k}" aria-label="${t('tr_open')}: ${mName(k)}" title="${t('tr_open')}">${spark(k,S.day,m.s,72,20)}</button>`}</td></tr>`; }).join('');
   const pats=E.P.filter(p=>p.organ===id).map(p=>`<div class="alert s${p.s}"><span class="eyebrow c${p.s}">${shape(p.s)}${t(['st0','st1','st2'][p.s])}</span><b>${p.title}</b><p>${p.desc}</p></div>`).join('');
   return `<div class="fade-in">
     <button class="back"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>${t('back')}</button>
@@ -134,6 +134,7 @@ function organDetail(id){
     <p class="what">${L.what}</p>
     ${pats}
     ${protocolCard(id,st)}
+    ${id==='eyes'?`<button class="btn small test-btn" data-test="amsler">${t('chk_amsler')}</button>`:id==='brain'?`<button class="btn small test-btn" data-test="react">${t('chk_react')}</button>`:''}
     <div class="card"><table class="mtable"><tr><td class="label">${t('metric')}</td><td class="label">${t('value')}</td><td class="label">${t('base')}</td><td class="label">${t('trend')}</td></tr>${rows}</table></div>
     <div class="card"><span class="label">${t('escalate')}</span><p class="todo">${L.esc}</p>
       <dl class="kv-list"><div><dt>${t('oneway')}</dt><dd>${ENV[S.env].delayTxt}</dd></div></dl></div>

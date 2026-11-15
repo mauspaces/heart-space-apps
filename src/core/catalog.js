@@ -24,6 +24,7 @@ export const METRICS = {
  vestibular:{es:"Equilibrio",en:"Balance",unit:"",dec:0},
  vision:{es:"Agudeza visual",en:"Visual acuity",unit:"",dec:0},
  symptoms:{es:"Síntomas",en:"Symptoms",unit:"",dec:0},
+ rt:{es:"Tiempo de reacción",en:"Reaction time",unit:"ms",dec:0},
 };
 export const mName = k => METRICS[k][LANG];
 
@@ -41,7 +42,7 @@ export const HAZ = {
 };
 
 export const ORG = {
- brain:{pos:[0,1.68,0.0], metrics:["sleep","mood"], hz:["isolation","radiation","distance"], yaw:0,
+ brain:{pos:[0,1.68,0.0], metrics:["sleep","mood","rt"], hz:["isolation","radiation","distance"], yaw:0,
   es:{name:"Cerebro: sueño y ánimo",what:"Regula el sueño, el ánimo y la atención. El aislamiento, la luz artificial y la carga de trabajo alteran el ritmo circadiano.",
    act:["Mantén horarios de sueño y luz regulares.","Prioriza 8 h de descanso, usa la terapia de luz programada y escribe una línea en tu diario.","Replanifica tareas críticas y agenda una conferencia privada con psicología en Tierra."],
    esc:"Ánimo muy bajo varios días, ideas preocupantes o errores operativos.",how:["Haz el check-in diario de 1 minuto.","El actígrafo registra tu sueño y tu exposición a la luz.","Opcional: test de reacción de 3 minutos."]},

@@ -14,6 +14,7 @@ import './styles/tools.css';
 import './ui/crew.js';
 import './ui/minimap.js';
 import './ui/demo.js';
+import './ui/tests.js';
 
 /* Offline after first load (production build only). */
 if ('serviceWorker' in navigator && import.meta.env.PROD) {

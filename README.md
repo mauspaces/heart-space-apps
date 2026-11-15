@@ -13,6 +13,12 @@ A personal health console that runs entirely on board (offline-first) and helps 
 - **Personal baselines, not population averages.** Every astronaut is compared with their own days 1–14.
 - **Combined-pattern alerts.** NASA notes that spaceflight hazards feed each other, so the engine looks at patterns (e.g. lower HRV + shorter sleep + rising temperature → possible early infection, *before* fever), not isolated numbers.
 - **Interactive 3D body hologram.** Tap an organ or its "+" pin to see what it does, today vs. baseline, a 30-day trend, what to do now, when to escalate and how to measure it. The five NASA hazards filter which organs light up.
+- **Five physiological systems as a traffic light** (cardiovascular & fluids · neuro-ocular/SANS & balance · metabolic & musculoskeletal · thermoregulation, immunity & environment · neurobehavioural & circadian), each tied to the NASA studies behind it.
+- **Deterministic, auditable protocol.** Every deviation runs the same 3 fixed steps (verify the measurement, apply the countermeasure, re-evaluate or package telemetry for Earth), with countermeasures such as thigh cuffs, electrolytes, B-complex, guided eye photo and 4-hourly temperature. No generative AI makes medical decisions.
+- **Scheduled checks, not 24/7 monitoring.** Daily checks at rest and after exercise. **Intensive monitoring** (every 4 h) switches on only during a contingency: a system in review or alert, a solar storm, or a gravity transition.
+- **On-board self-tests**: Amsler grid (vision / SANS) and a reaction-time micro-test (fatigue). Their thresholds are illustrative.
+- **Trend history** for every indicator, plotted against the astronaut's own baseline band.
+- **Radiation as a discrete trigger** in the top bar (Nominal / SPE alert).
 - **Readiness for a critical task** (EVA readiness score: Ready / Review / Not fit).
 - **Crew view** for the Crew Medical Officer: an EVA go / no-go poll board for the four crew members, portraits, top alert, contagion alert, and a per-astronaut privacy switch (share with crew / share with Earth).
 - **Environments:** ISS (≈0.5 s delay, 0.5 mSv/day) · Mars transit (≤20 min, 1.8 mSv/day) · Mars surface (≤20 min, 0.67 mSv/day, 0.38 g) · Lunar base (≈1.3 s, 0.17 g).

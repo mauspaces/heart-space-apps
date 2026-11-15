@@ -174,3 +174,19 @@ Object.assign(STR.es,{ chk_sched:"Chequeos programados", chk_int:"Monitoreo inte
   tr_open:"Historial", tr_close:"Cerrar", tr_base:"Línea base",
   tr_sub:"Días 1–{d}. Banda = tu propia línea base (días 1–14), media ± 1 DE. Líneas: día de infección temprana y tormenta solar.",
   tr_bp:"Se muestra la presión sistólica." });
+
+/* Self-tests: Amsler grid and reaction micro-test (illustrative). */
+Object.assign(STR.en,{ am_title:"Amsler grid", am_how:"Hold the screen at reading distance, cover one eye and look only at the centre dot. Are all lines straight and every square present?",
+  am_ok:"All lines straight", am_wavy:"Wavy lines or missing areas", am_ok_v:"Amsler OK", am_wavy_v:"Amsler: distortion",
+  am_saved_ok:"Amsler grid saved: no distortion", am_saved_wavy:"Amsler grid: distortion logged · SANS protocol",
+  rt_title:"Reaction micro-test", rt_how:"5 trials. Press the pad (or Space) as soon as it turns cyan. Not before.",
+  rt_start:"Press to start", rt_wait:"Wait…", rt_go:"Now!", rt_soon:"Too soon. Press to retry this trial",
+  rt_rule:"Your first result is your personal reference. Illustrative threshold: more than 20 % slower than your reference = review.",
+  rt_saved:"Reaction micro-test saved:" });
+Object.assign(STR.es,{ am_title:"Rejilla de Amsler", am_how:"Sostén la pantalla a distancia de lectura, tapa un ojo y mira solo el punto central. ¿Todas las líneas se ven rectas y no falta ningún cuadro?",
+  am_ok:"Todas las líneas rectas", am_wavy:"Líneas onduladas o zonas faltantes", am_ok_v:"Amsler OK", am_wavy_v:"Amsler: distorsión",
+  am_saved_ok:"Rejilla de Amsler guardada: sin distorsión", am_saved_wavy:"Rejilla de Amsler: distorsión registrada · protocolo SANS",
+  rt_title:"Micro-test de reacción", rt_how:"5 intentos. Pulsa el panel (o Espacio) en cuanto se ponga cian. No antes.",
+  rt_start:"Pulsa para empezar", rt_wait:"Espera…", rt_go:"¡Ya!", rt_soon:"Demasiado pronto. Pulsa para repetir el intento",
+  rt_rule:"Tu primer resultado es tu referencia personal. Umbral ilustrativo: más de 20 % más lento que tu referencia = revisar.",
+  rt_saved:"Micro-test de reacción guardado:" });

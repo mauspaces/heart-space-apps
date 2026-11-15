@@ -51,6 +51,10 @@ npm run build    # static site in dist/
 | `src/holo/holo2d.js` | Canvas 2D point-cloud hologram, `selectOrgan(id)`. Stays as the no-WebGL fallback |
 | `src/ui/app.js` | Everything else: vitals, right panel, organ detail, timeline, storm overlay, check-in, toasts, boot, `setDay` |
 | `src/ui/ecg.js` | ECG sweep |
+| `src/core/catalog.js` → `SYS`, `SYS_OF` | The 5 physiological systems of the Notion medical matrix with NASA refs and a fixed 3-step protocol per level (`proto[0]` routine, `[1]` yellow, `[2]` red). `evaluate()` returns `Y[sys]` |
+| `src/ui/trend.js` | Full-history chart per indicator vs baseline band (mean ± 1 SD) |
+| `src/ui/tests.js` | Amsler grid + reaction micro-test → per-day overrides `amsler`, `rt` (feed `M.vision`, `M.rt`) |
+| `src/styles/tools.css` | Styles for systems strip, protocol, checks list / intensive mode, trend, tests |
 | `src/styles/app.css` | All current styles and colour tokens (`:root`) |
 | `docs/design/` | `DESIGN.md` (H.E.A.R.T tokens) and `DESIGN-spacex.md` (structure reference) |
 | `docs/brain/` | Team research vault (Spanish). Start at `00 Inicio.md` |

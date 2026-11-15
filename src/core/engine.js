@@ -3,7 +3,7 @@
 import { clamp } from './util.js';
 import { LANG, t } from './i18n.js';
 import { ORG, SYS, mName } from './catalog.js';
-import { STORM_DAY } from './sim.js';
+import { STORM_DAY, DAYS } from './sim.js';
 import { S, val as valOf, baseOf, avg as avgOf, cumDose as cumDoseOf } from './state.js';
 import { CREW, CREW_BY_ID } from './crew.js';
 
@@ -34,7 +34,11 @@ export function evaluate(d,id=S.member){
   const dose=cumDose(d); const storm=(d===STORM_DAY);
   M.dose={v:Math.round(dose),s: storm&&!S.sheltered?2: storm?1: 0, b:null};
   M.vestibular={v:S.env==='mars'?(LANG==='es'?'Inestable':'Unsteady'):(LANG==='es'?'Estable':'Steady'),s:vest2?2:mars?1:0,b:null};
-  M.vision={v:"20/20",s:0,b:"20/20"};
+  // vision: Amsler grid self-test (per-day override); "wavy" lines or missing areas = review
+  const am=val(d,'amsler'); M.vision={v:am==='wavy'?t('am_wavy_v'):am==='ok'?t('am_ok_v'):"20/20",s:am==='wavy'?1:0,b:"20/20"};
+  // reaction micro-test: the astronaut's first result is the reference; >20 % slower = review (illustrative)
+  const rt=val(d,'rt'); let rtRef=null; for(let i=1;i<=DAYS&&rtRef===null;i++){ const x=val(i,'rt'); if(typeof x==='number') rtRef=x; }
+  M.rt={v:typeof rt==='number'?Math.round(rt):'—',s:typeof rt==='number'&&rtRef&&rt>rtRef*1.2?1:0,b:rtRef?Math.round(rtRef):null};
   const sy=val(d,'symptoms')||[]; M.symptoms={v:sy.length?sy.map(x=>t('sym_'+x)).join(', '):t('none'),s:sy.includes('chills')?1:sy.length?1:0,b:null,list:sy};
 
   // combined patterns
