@@ -58,7 +58,7 @@ Press **Demo mode** in the top bar. It drives the real app:
 
 ## Tech
 
-Vite · vanilla ES modules · **Three.js WebGL body** drawn like a technical plate (procedural body with anti-aliased contour lines, faint skeleton, organs as grey volumes that take a status colour only when they need attention, accessible "+" pins, camera fly-to, orbit/zoom) · Canvas 2D point-cloud hologram as the no-WebGL fallback · SVG mini-map · deterministic simulated data (seeded generator, one series per crew member) · hand-written service worker emitted at build time. Fonts bundled via Fontsource (SIL OFL): Space Grotesk and Inter. Visual language: white lab-dossier canvas with black full-bleed chapters for the boot and the solar-storm alert; colour is reserved for medical status.
+Vite · vanilla ES modules · **Three.js WebGL anatomy**: a real human body and organs from BodyParts3D (glass skin with a fresnel rim and contour lines, pearl organs that light up amber/red on alert, soft bloom, accessible "+" pins, camera fly-to, orbit/zoom), built into a 690 KB meshopt-compressed GLB by `scripts/build-anatomy.mjs`, with a procedural body as the loading/failure fallback · Canvas 2D point-cloud hologram as the no-WebGL fallback · SVG mini-map · deterministic simulated data (seeded generator, one series per crew member) · hand-written service worker emitted at build time. Fonts bundled via Fontsource (SIL OFL): Barlow Condensed, JetBrains Mono and Inter. Visual language: dark mission-control canvas with hairline rules and a cinematic intro; colour and glow are reserved for live data and medical status.
 
 Code map: see [`CLAUDE.md`](CLAUDE.md). Design tokens: [`docs/design/`](docs/design). Team research notes (Spanish): [`docs/brain/`](docs/brain).
 
@@ -89,4 +89,7 @@ Analog missions (CHAPEA-like) → Artemis lunar missions → lunar base → Mars
 
 ## Credits and licences
 
-Code: MIT-style, for the competition entry. Fonts: SIL Open Font License via Fontsource. Crew portraits are the team members themselves; any AI-generated portrait carries a visible "AI-generated" mark.
+Code: MIT-style, for the competition entry. Fonts: SIL Open Font License via Fontsource.
+
+**3D anatomy** (`public/models/anatomy.glb`): derived from **BodyParts3D, © The Database Center for Life Science (DBCLS)**, licensed under [CC BY-SA 2.1 Japan](https://creativecommons.org/licenses/by-sa/2.1/jp/deed.en). Source meshes taken from the STL copies at [github.com/Kevin-Mattheus-Moerman/BodyParts3D](https://github.com/Kevin-Mattheus-Moerman/BodyParts3D); we merged, simplified, re-oriented and compressed them (`scripts/build-anatomy.mjs`). The derived model is shared under the same licence (CC BY-SA 2.1 JP).
+ Crew portraits are the team members themselves; any AI-generated portrait carries a visible "AI-generated" mark.

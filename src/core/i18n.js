@@ -106,9 +106,11 @@ Object.assign(STR.es,{
 });
 
 Object.assign(STR.en,{ boot_hook:"On Mars, the doctor is up to 20 minutes away.", boot_line:"Every astronaut becomes their own first responder.",
-  boot_sys:["Biometric link", "Baseline days 1–14", "Crew 4 / 4", "Hazard model"], boot_ok:"Online" });
+  boot_sys:["Biometric link", "Baseline days 1–14", "Crew 4 / 4", "Hazard model"], boot_ok:"Online",
+  credit_3d:"3D anatomy: BodyParts3D © DBCLS · CC BY-SA 2.1 JP" });
 Object.assign(STR.es,{ boot_hook:"En Marte, el médico está hasta a 20 minutos.", boot_line:"Cada astronauta se vuelve su propio primer respondiente.",
-  boot_sys:["Enlace biométrico", "Línea base días 1–14", "Tripulación 4 / 4", "Modelo de riesgos"], boot_ok:"En línea" });
+  boot_sys:["Enlace biométrico", "Línea base días 1–14", "Tripulación 4 / 4", "Modelo de riesgos"], boot_ok:"En línea",
+  credit_3d:"Anatomía 3D: BodyParts3D © DBCLS · CC BY-SA 2.1 JP" });
 
 /* GO / NO-GO poll, evidence, escalation, light-time, data provenance. */
 Object.assign(STR.en,{

@@ -1,11 +1,18 @@
-/* WebGL body (Three.js) drawn like a technical plate on the white lab canvas:
-   fine anti-aliased contour lines for the skin, a faint skeleton, organs as soft grey volumes that take
-   a status colour only when they need attention, BioDigital-style "+" pins, camera fly-to, orbit/zoom.
-   Procedural geometry (no external model). Coordinates match ORG[id].pos in catalog.js (y up, front = +z).
-   Falls back silently to the Canvas 2D hologram (holo2d.js) when WebGL is unavailable. */
+/* WebGL body (Three.js) on the dark mission-control stage:
+   real anatomy (BodyParts3D, CC BY-SA, built by scripts/build-anatomy.mjs into public/models/anatomy.glb),
+   glass skin with a cyan fresnel rim and fine contour lines, pearl organs that light up amber/red on alert,
+   soft bloom, a sparse starfield, "+" pins, camera fly-to, orbit/zoom.
+   While the model loads (or if it fails) a procedural body is shown. Coordinates match ORG[id].pos in
+   catalog.js (y up, front = +z, subject's left = +x). Falls back to the Canvas 2D hologram without WebGL. */
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { REDUCED, $ } from '../core/util.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
+import { REDUCED, $, mulberry32 } from '../core/util.js';
 import { LANG, t } from '../core/i18n.js';
 import { HAZ, ORG } from '../core/catalog.js';
 import { S } from '../core/state.js';
@@ -42,6 +49,24 @@ function mat(color, o) {
       uColor: { value: color.clone() }, uScanY: { value: -9 }, uBase: { value: o.base }, uRim: { value: o.rim },
       uLine: { value: o.line }, uFreq: { value: o.freq ?? 55 }, uAlpha: { value: 1 }, uScan: { value: o.scan ?? 1 }, uBack: { value: o.back ?? .35 }, uReveal: { value: 9 },
     },
+  });
+}
+/* organs: solid-looking volumes lit by a fixed key light, with a rim; uGlow pushes alert organs over the bloom threshold */
+const ORG_FRAG = `uniform vec3 uColor; uniform float uAlpha,uReveal,uGlow;
+varying vec3 vN; varying vec3 vV; varying vec3 vW;
+void main(){
+  if(vW.y>uReveal) discard;
+  vec3 n=normalize(vN); if(!gl_FrontFacing) n=-n;
+  float d=max(dot(n,normalize(vec3(.35,.75,.6))),0.)*.6+.22;
+  float f=pow(1.-abs(dot(n,normalize(vV))),2.2);
+  float edge=exp(-abs(vW.y-uReveal)*45.);
+  vec3 c=uColor*(d*.55+f*.35+uGlow)+vec3(.36,.84,1.)*edge;
+  gl_FragColor=vec4(c,uAlpha);
+}`;
+function orgMat(color) {
+  return new THREE.ShaderMaterial({
+    vertexShader: VERT, fragmentShader: ORG_FRAG, transparent: true, depthWrite: true, side: THREE.DoubleSide,
+    uniforms: { uColor: { value: color.clone() }, uAlpha: { value: 1 }, uReveal: { value: 9 }, uGlow: { value: 0 } },
   });
 }
 
@@ -100,7 +125,7 @@ function buildSkeleton() {
 function buildOrgans() {
   const root = new THREE.Group(), M = {};
   const add = (id, mesh) => {
-    if (!M[id]) M[id] = { meshes: [], mat: mat(NEUTRAL, { base: .16, rim: .5, line: 0, scan: 0, back: .5 }) };
+    if (!M[id]) M[id] = { meshes: [], mat: orgMat(NEUTRAL) };
     mesh.material = M[id].mat; mesh.userData.organ = id; mesh.renderOrder = 0; M[id].meshes.push(mesh); root.add(mesh);
   };
   const tmp = new THREE.MeshBasicMaterial();
@@ -136,7 +161,7 @@ export function init3D() {
   cv.setAttribute('aria-label', 'Interactive 3D model of the astronaut\'s body. Use the organ pins to inspect each system.');
   cv.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:grab';
   host.insertBefore(cv, old); old.style.display = 'none'; S.use3d = true;
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
   renderer.setClearColor(0x05070a, 1);
 
   const scene = new THREE.Scene();
@@ -152,6 +177,45 @@ export function init3D() {
   const body = buildBody(skin); body.traverse(o => { o.renderOrder = 2; }); scene.add(body);
   const skeleton = buildSkeleton(); skeleton.renderOrder = 1; scene.add(skeleton);
   const { root: organRoot, M: ORGANS } = buildOrgans(); scene.add(organRoot);
+
+  /* real anatomy: swap the procedural body for the BodyParts3D model once it has loaded (the procedural one stays on failure) */
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(`${import.meta.env.BASE_URL}models/anatomy.glb`, gltf => {
+    gltf.scene.updateMatrixWorld(true);
+    const nodes = {}; gltf.scene.traverse(o => { if (o.isMesh) nodes[o.name || o.parent?.name] = o; });
+    const byName = n => nodes[n] || Object.values(nodes).find(m => m.parent && m.parent.name === n);
+    const skinMesh = byName('skin');
+    if (!skinMesh) return;
+    /* glass skin: very low fill, strong cyan fresnel rim, faint contour lines */
+    skin.uniforms.uBase.value = 0.012; skin.uniforms.uRim.value = 0.62; skin.uniforms.uLine.value = 0.11;
+    skin.uniforms.uFreq.value = 80; skin.uniforms.uBack.value = 0.12;
+    body.clear(); body.attach(skinMesh); skinMesh.material = skin; skinMesh.renderOrder = 2;
+    scene.remove(skeleton);
+    for (const id in ORGANS) {
+      const m = byName(id); if (!m) continue;
+      for (const old of ORGANS[id].meshes) organRoot.remove(old);
+      organRoot.attach(m); m.material = ORGANS[id].mat; m.userData.organ = id; m.renderOrder = 0; ORGANS[id].meshes = [m];
+    }
+    S.anatomy = 'bodyparts3d';
+    const cr = document.createElement('p'); cr.className = 'holo-credit'; cr.dataset.i18n = 'credit_3d'; cr.textContent = t('credit_3d');
+    host.appendChild(cr);
+  }, undefined, () => {});
+
+  /* a sparse, static starfield far behind the body (seeded, so it never changes between visits) */
+  {
+    const rnd = mulberry32(1969), N = 700, P = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const u = rnd() * 2 - 1, a = rnd() * Math.PI * 2, r = 14 + rnd() * 10, q = Math.sqrt(1 - u * u);
+      P.set([Math.cos(a) * q * r, u * r + 1, Math.sin(a) * q * r], i * 3);
+    }
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.BufferAttribute(P, 3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: 0xbfd8ff, size: 1.3, sizeAttenuation: false, transparent: true, opacity: 0.55, depthWrite: false })));
+  }
+
+  /* soft bloom: only the fresnel rim, the scan line and alert organs cross the threshold */
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  const bloom = new UnrealBloomPass(new THREE.Vector2(256, 256), 0.6, 0.4, 0.32); // strength, radius, threshold
+  composer.addPass(bloom); composer.addPass(new OutputPass());
 
   // floor: calibration rings and ticks
   const ringMat = op => new THREE.MeshBasicMaterial({ color: INK, transparent: true, opacity: op, side: THREE.DoubleSide, depthWrite: false });
@@ -188,7 +252,8 @@ export function init3D() {
   }
   function resize() {
     const w = host.clientWidth, h = host.clientHeight; if (!w || !h) return;
-    renderer.setSize(w, h, false); camera.aspect = w / h; viewOffset(w, h); camera.updateProjectionMatrix();
+    renderer.setSize(w, h, false); composer.setPixelRatio(renderer.getPixelRatio()); composer.setSize(w, h);
+    camera.aspect = w / h; viewOffset(w, h); camera.updateProjectionMatrix();
   }
   new ResizeObserver(resize).observe(host); window.addEventListener('resize', resize); resize();
 
@@ -246,9 +311,9 @@ export function init3D() {
       const u = ORGANS[id].mat.uniforms;
       col.copy(aff ? STATUS[st] : DIM); u.uColor.value.copy(col);
       const pulse = st > 0 && !REDUCED ? 0.82 + 0.18 * Math.sin(time * 3.2) : 1;
-      u.uBase.value = st > 0 ? 0.4 : 0.14;
-      u.uRim.value = st > 0 ? 0.5 : 0.45;
-      u.uAlpha.value = (aff ? (sel ? 1.35 : 1) : 0.5) * pulse;
+      /* bloom threshold is luminance-based, so red needs a bigger push than amber to glow as much */
+      u.uGlow.value = ((aff ? [0, 0.9, 2.2][st] : 0) + (sel ? 0.25 : 0)) * pulse;
+      u.uAlpha.value = aff ? 1 : 0.3;
     }
 
     const w = host.clientWidth, h = host.clientHeight;
@@ -270,7 +335,7 @@ export function init3D() {
       }
     }
     if (hudYaw) hudYaw.textContent = Math.round(((Math.atan2(camera.position.x - controls.target.x, camera.position.z - controls.target.z) * 180 / Math.PI) + 360) % 360) + '°';
-    renderer.render(scene, camera);
+    composer.render();
   }
   requestAnimationFrame(frame);
   return true;

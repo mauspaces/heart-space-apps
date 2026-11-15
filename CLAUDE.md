@@ -46,6 +46,8 @@ npm run build    # static site in dist/
 | `src/core/state.js` | `S` (day, env, selected organ, `S.EVAL`…), `val`, `BASE` (days 1–14), `avg`, `cumDose`, `actions` (late-bound UI callbacks) |
 | `src/core/engine.js` | `evaluate(day)` → `{M, P, O, score, factors, dose}`: metric status vs baseline, combined patterns, organ status, EVA readiness |
 | `src/core/util.js` | `clamp`, `mulberry32`, `stColor`, `hexA`, `$`, `REDUCED` |
+| `src/holo/holo3d.js` | Three.js stage: loads `public/models/anatomy.glb` (BodyParts3D, CC BY-SA, credited in README + on stage), glass-skin + organ shaders, bloom, starfield, pins. Procedural body shown while loading / on failure |
+| `scripts/build-anatomy.mjs` | One-off dev script: BodyParts3D STL → `anatomy.glb` (node names = `ORG` ids). Re-run only if organs change; pin positions in `catalog.js` match its printed centres |
 | `src/holo/holo2d.js` | Canvas 2D point-cloud hologram, `selectOrgan(id)`. Stays as the no-WebGL fallback |
 | `src/ui/app.js` | Everything else: vitals, right panel, organ detail, timeline, storm overlay, check-in, toasts, boot, `setDay` |
 | `src/ui/ecg.js` | ECG sweep |

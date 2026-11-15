@@ -17,3 +17,6 @@
 .pin:hover .pin-lab,.pin:focus-visible .pin-lab,.pin.sel .pin-lab{display:flex}
 .pin:focus-visible{outline:2px solid var(--ink);outline-offset:4px;border-radius:50%}
 @media (max-width:1100px){.pin{width:28px;height:28px;margin:-14px 0 0 -14px}}
+/* licence credit for the BodyParts3D anatomy (CC BY-SA), bottom-left of the stage */
+.holo-credit{position:absolute;left:50%;bottom:6px;transform:translateX(-50%);margin:0;z-index:3;font:400 10px/1.2 var(--f-mono);letter-spacing:.02em;color:var(--gray);opacity:.75;pointer-events:none;white-space:nowrap}
+@media (min-width:1101px){.holo-credit{bottom:calc(var(--tl-h) + 4px)}}
